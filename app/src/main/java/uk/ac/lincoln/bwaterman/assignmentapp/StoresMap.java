@@ -121,18 +121,18 @@ public class StoresMap extends FragmentActivity implements
         protected String doInBackground(String... arg0)  {
 
             try {
-                // create new instance of the httpConnect class
+                //
                 HttpConnect jParser = new HttpConnect();
 
-                // get json string from service url
+                //
                 String json = jParser.getJSONFromUrl(yourServiceUrl);
 
-                // parse returned json string into json array
+                //
                 JSONObject jsonObject = new JSONObject(json);
 
                 JSONArray jsonArray = jsonObject.optJSONArray("results");
 
-                // loop through json array and add each tweet to item in arrayList
+                //
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonSubObject = jsonArray.getJSONObject(i);
 
@@ -172,7 +172,7 @@ public class StoresMap extends FragmentActivity implements
                 for(int i = 0; i < storeList.size(); i++) {
                     map.addMarker(new MarkerOptions()
                             .position(latLongList.get(i))
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
                             .title(storeList.get(i)));
                 }
             }

@@ -127,6 +127,7 @@ public class TwitchGames extends Activity {
                     Intent intent = new Intent(TwitchGames.this, TwitchStreams.class);
                     //pass the name of the game to the new intent
                     intent.putExtra("gameName", gameList.get(position));
+                    intent.putExtra("gameViewers", channelViewersList.get(position));
                     startActivity(intent);
                 }
             });

@@ -56,6 +56,15 @@
         android:src="@color/colorPrimaryDark"
         android:layout_above="@+id/twitchList"
         android:layout_alignParentStart="true"
-        android:id="@+id/imageView2" />
+        android:id="@+id/dividerImage" />
+
+    <TextView
+        android:text="Top 20 most viewed games"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/dividerImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="17dp"
+        android:id="@+id/gamesSubtitleText" />
 
 </RelativeLayout>

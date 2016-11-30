@@ -29,6 +29,7 @@ public class TwitchStreams extends Activity {
     ArrayList<String> channelUrlList = new ArrayList<>();
     ArrayList<String> textList = new ArrayList<>();
     String gameName;
+    String gameViewers;
     DatabaseHelper databaseHelper;
 
     @Override
@@ -41,9 +42,13 @@ public class TwitchStreams extends Activity {
         if (extras != null) {
             //must match "gameName" of parameter passed as an extra
             gameName = extras.getString("gameName");
+            gameViewers = extras.getString("gameViewers");
         }
         TextView titleText = (TextView) findViewById(R.id.titleTextView);
         titleText.setText(gameName);
+
+        TextView subtitleText = (TextView) findViewById(R.id.streamerSubtitleText);
+        subtitleText.setText(gameViewers + " people watching this game");
 
         //replace blank space with + so the url works
         gameName = gameName.replace(" ", "+");

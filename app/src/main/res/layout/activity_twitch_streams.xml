@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:paddingLeft="0dp"
@@ -9,18 +10,6 @@
     tools:context="uk.ac.lincoln.bwaterman.assignmentapp.TwitchStreams"
     android:layout_width="match_parent">
 
-    <Button
-        android:layout_width="fill_parent"
-        android:text="Find Local Game Store"
-        android:id="@+id/button"
-        android:layout_alignParentBottom="true"
-        android:textSize="20sp"
-        android:onClick="findGameStores"
-        android:paddingLeft="0dp"
-        android:paddingRight="0dp"
-        android:background="@android:color/holo_blue_dark"
-        android:layout_height="80dp" />
-
 
     <GridView
         android:layout_width="match_parent"
@@ -28,38 +17,50 @@
         android:numColumns="1"
         android:layout_below="@+id/titleTextView"
         android:layout_alignParentStart="true"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         android:layout_height="match_parent" />
 
     <ImageView
-        android:src="@color/common_google_signin_btn_text_dark_focused"
+        app:srcCompat="@color/colorPrimaryDark"
+        android:src="@color/colorPrimaryDark"
         android:layout_width="match_parent"
-        android:id="@+id/blackBar2"
-        android:layout_above="@+id/button"
-        android:layout_alignParentStart="true"
-        android:layout_height="2dp" />
-
-    <ImageView
-        android:src="@color/common_google_signin_btn_text_dark_focused"
-        android:layout_width="match_parent"
-        android:id="@+id/blackBar1"
+        android:id="@+id/dividerImage"
         android:layout_height="2dp"
         android:layout_above="@+id/channelGridView"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Game Name"
         android:id="@+id/titleTextView"
         android:textStyle="bold"
-        android:textSize="18sp"
+        android:textSize="30sp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:gravity="center"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_height="120dp"
+        android:textColor="?android:attr/textColorTertiary" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:srcCompat="@drawable/twitch_logo_icon"
+        android:src="@drawable/twitch_logo_icon"
+        android:id="@+id/twitchLogoIcon"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="200000 people watching this game"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/dividerImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="17dp"
+        android:id="@+id/streamerSubtitleText" />
 
 </RelativeLayout>
