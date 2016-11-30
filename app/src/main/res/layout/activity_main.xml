@@ -47,6 +47,7 @@
         android:layout_alignParentEnd="true" />
 
     <ImageView
+        app:srcCompat="@drawable/twitch_logo_text"
         android:src="@drawable/twitch_logo_text"
         android:id="@+id/twitchLogoText"
         android:layout_width="200dp"

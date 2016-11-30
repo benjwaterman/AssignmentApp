@@ -1,5 +1,7 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -90,7 +92,7 @@ public class StoresMap extends FragmentActivity implements
 
         googleMap.addMarker(new MarkerOptions()
                 .position(new LatLng(lat, longi))
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("twitch_logo_icon_white", 30, 30)))
                 .title("You"));
 
         LatLng latLng = new LatLng(lat, longi);
@@ -164,7 +166,7 @@ public class StoresMap extends FragmentActivity implements
         }
 
         @Override
-        // below method will run when service HTTP request is complete, will then bind tweet text in arrayList to ListView
+        // Add markers to locations of stores
         protected void onPostExecute(String strFromDoInBg) {
             if(map != null) {
                 for(int i = 0; i < storeList.size(); i++) {
@@ -177,4 +179,12 @@ public class StoresMap extends FragmentActivity implements
 
         }
     }
+
+    //Resize the icon before its used as a map marker
+    public Bitmap resizeMapIcons(String iconName, int width, int height){
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth()/width, imageBitmap.getHeight()/height, false);
+        return resizedBitmap;
+    }
+
 }
