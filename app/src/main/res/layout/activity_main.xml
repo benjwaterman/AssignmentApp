@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="uk.ac.lincoln.bwaterman.assignmentapp.MainActivity"
+    android:padding="0dp">
+
+    <Button
+        android:text="Clear Image Cache"
+        android:layout_width="195dp"
+        android:layout_height="60dp"
+        android:id="@+id/clearImageButton"
+        android:layout_marginBottom="43dp"
+        android:onClick="clearImageData"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="200 MB Used"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spaceUsedText"
+        android:layout_marginBottom="22dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="companion"
+        android:id="@+id/titleText"
+        android:textSize="20sp"
+        android:textAllCaps="false"
+        android:textStyle="normal|bold|italic"
+        android:layout_marginEnd="26dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:src="@drawable/twitch_logo_text"
+        android:id="@+id/twitchLogoText"
+        android:layout_width="200dp"
+        android:layout_height="75dp"
+        android:layout_below="@+id/titleText"
+        android:layout_centerHorizontal="true"
+        android:scaleType="fitXY"
+        android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:text="Games"
+        android:id="@+id/getGames"
+        android:onClick="startTwitch"
+        android:layout_height="60dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:layout_below="@+id/twitchLogoText"
+        android:layout_alignParentStart="true"
+        android:layout_width="192dp"
+        android:textAlignment="center"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:text="Local Game Stores"
+        android:layout_height="60dp"
+        android:id="@+id/getStores"
+        android:onClick="findStores"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@android:color/white"
+        android:textAlignment="center"
+        android:layout_below="@+id/twitchLogoText"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+        android:layout_width="192dp" />
+
+    <TextView
+        android:text="Favourites"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/favouritesTitle"
+        android:textSize="20sp"
+        android:layout_below="@+id/getGames"
+        android:layout_alignStart="@+id/favouritesListView"
+        android:layout_marginTop="20dp" />
+
+    <ListView
+        android:layout_height="200dp"
+        android:layout_width="300dp"
+        android:id="@+id/favouritesListView"
+        android:layout_below="@+id/favouritesTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp" />
+
+</RelativeLayout>
