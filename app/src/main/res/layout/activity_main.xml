@@ -56,33 +56,14 @@
         android:scaleType="fitXY"
         android:layout_gravity="center_horizontal"/>
 
-    <Button
-        android:text="Games"
-        android:id="@+id/getGames"
-        android:onClick="startTwitch"
-        android:layout_height="60dp"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:background="@color/colorPrimary"
-        android:textColor="@android:color/white"
-        android:layout_below="@+id/twitchLogoText"
-        android:layout_alignParentStart="true"
-        android:layout_width="192dp"
-        android:textAlignment="center"
-        android:layout_marginTop="20dp" />
 
-    <Button
-        android:text="Local Game Stores"
-        android:layout_height="60dp"
-        android:id="@+id/getStores"
-        android:onClick="findStores"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:background="@color/colorPrimaryDark"
-        android:textColor="@android:color/white"
-        android:textAlignment="center"
-        android:layout_below="@+id/twitchLogoText"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="20dp"
-        android:layout_width="192dp" />
+    <ListView
+        android:layout_height="200dp"
+        android:layout_width="300dp"
+        android:id="@+id/favouritesListView"
+        android:layout_above="@+id/clearImageButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:text="Favourites"
@@ -90,16 +71,44 @@
         android:layout_height="wrap_content"
         android:id="@+id/favouritesTitle"
         android:textSize="20sp"
-        android:layout_below="@+id/getGames"
+        android:layout_above="@+id/favouritesListView"
         android:layout_alignStart="@+id/favouritesListView"
-        android:layout_marginTop="20dp" />
+        android:layout_marginBottom="10dp" />
 
-    <ListView
-        android:layout_height="200dp"
-        android:layout_width="300dp"
-        android:id="@+id/favouritesListView"
-        android:layout_below="@+id/favouritesTitle"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/twitchLogoText"
+        android:layout_alignParentStart="true"
+        android:weightSum="1">
+
+        <Button
+            android:text="Games"
+            android:id="@+id/getGames"
+            android:onClick="startTwitch"
+            android:layout_height="60dp"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:layout_weight="0.5"
+            android:layout_width="192dp"
+            android:textAlignment="center"
+            android:layout_marginTop="20dp" />
+
+        <Button
+            android:text="Local Game Stores"
+            android:layout_height="60dp"
+            android:id="@+id/getStores"
+            android:onClick="findStores"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@android:color/white"
+            android:textAlignment="center"
+            android:layout_weight="0.5"
+            android:layout_marginTop="20dp"
+            android:layout_width="192dp" />
+
+    </LinearLayout>
 
 </RelativeLayout>
