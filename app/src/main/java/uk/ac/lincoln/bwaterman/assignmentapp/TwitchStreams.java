@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,12 +32,18 @@ public class TwitchStreams extends Activity {
     String gameName;
     String gameViewers;
     DatabaseHelper databaseHelper;
+    boolean isConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_twitch_streams);
         databaseHelper = new DatabaseHelper(this);
+
+        //Start progress spinner while loading
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressStreams);
+        progressBar.setIndeterminate(true);
+        progressBar.setVisibility(View.VISIBLE);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -60,10 +67,14 @@ public class TwitchStreams extends Activity {
 
         // set the url of the web service to call
         String yourServiceUrl = "https://api.twitch.tv/kraken/streams?game=";
+        ProgressBar progressBar;
 
         @Override
         // this method is used for......................
         protected void onPreExecute() {
+            //Get progress bar
+            progressBar = (ProgressBar) findViewById(R.id.progressStreams);
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -75,7 +86,14 @@ public class TwitchStreams extends Activity {
                 HttpConnect jParser = new HttpConnect();
 
                 // get json string from service url
-                String json = jParser.getJSONFromUrl(yourServiceUrl + gameName);
+                String json = jParser.getJSONFromUrl(yourServiceUrl + gameName, getApplicationContext());
+
+                //If no data was returned or string is null, set connection to false and return out of function
+                if(json == null || json.length() == 0) {
+                    isConnected = false;
+                    return null;
+                }
+                isConnected = true;
 
                 //base object, contains everything
                 JSONObject jsonObject = new JSONObject(json);
@@ -137,6 +155,13 @@ public class TwitchStreams extends Activity {
         @Override
         // below method will run when service HTTP request is complete, will then bind tweet text in arrayList to ListView
         protected void onPostExecute(String strFromDoInBg) {
+            //If not connected, set not connected text to visible and return out of function
+            if(!isConnected) {
+                TextView text = (TextView)findViewById(R.id.noConnectionText);
+                text.setVisibility(View.VISIBLE);
+                return;
+            }
+
             //Find grid view stuff
             GridView gridview = (GridView) findViewById(R.id.channelGridView);
             //Set adapter to custom adapter
@@ -168,24 +193,8 @@ public class TwitchStreams extends Activity {
                 }
             });
 
-            /*
-            //Long on click listener
-            gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
-                    try {
-                        boolean isInserted = databaseHelper.insertData(channelNameList.get(position), channelUrlList.get(position), "0");
-                        if(isInserted)
-                            Toast.makeText(TwitchStreams.this,"Favourite added!",Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(TwitchStreams.this,"An error occurred: favourite not added",Toast.LENGTH_SHORT).show();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return true;
-                }
-            });
-            */
+            //Complete progress spinner after done loading
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 

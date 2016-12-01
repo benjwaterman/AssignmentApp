@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,6 +22,7 @@ public class TwitchGames extends Activity {
     ArrayList<String> channelViewersList = new ArrayList<>();
     ArrayList<String> imageUrlList = new ArrayList<>();
     ArrayList<String> textList = new ArrayList<>();
+    boolean isConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +62,14 @@ public class TwitchGames extends Activity {
                 HttpConnect jParser = new HttpConnect();
 
                 // get json string from service url
-                String json = jParser.getJSONFromUrl(yourServiceUrl);
+                String json = jParser.getJSONFromUrl(yourServiceUrl, getApplicationContext());
 
-                //jsonTest = json.toString();
+                //If no data was returned or string is null, set connection to false and return out of function
+                if(json == null || json.length() == 0) {
+                    isConnected = false;
+                    return null;
+                }
+                isConnected = true;
 
                 // parse returned json string into json array
                 JSONObject jsonObject = new JSONObject(json);
@@ -115,6 +122,13 @@ public class TwitchGames extends Activity {
         @Override
         // below method will run when service HTTP request is complete, will then bind tweet text in arrayList to ListView
         protected void onPostExecute(String strFromDoInBg) {
+            //If not connected, set not connected text to visible and return out of function
+            if(!isConnected) {
+                TextView text = (TextView)findViewById(R.id.noConnectionText);
+                text.setVisibility(View.VISIBLE);
+                return;
+            }
+
             //Gridview stuff
             GridView gridview = (GridView) findViewById(R.id.twitchList);
             gridview.setAdapter(new GridAdapter(TwitchGames.this, textList, imageUrlList, gameList, false));

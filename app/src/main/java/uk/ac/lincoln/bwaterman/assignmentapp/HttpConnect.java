@@ -1,6 +1,12 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,9 +20,20 @@ public class HttpConnect {
     final String TAG = "JsonParser.java";
     // where the returned json data from service will be stored when downloaded
     static String json = "";
+    //store context
+    Context context;
 
     // your android activity will call this method and pass in the url of the REST service
-    public String getJSONFromUrl(String url) {
+    public String getJSONFromUrl(String url, Context _context) {
+        context = _context;
+
+        //If not connected
+        if(!isConnected()) {
+            //Create toast for user alerting them
+            createToast("No internet connection found!");
+            //Exit it out of function, no point trying to connect with no connection
+            return null;
+        }
 
         try {
             // this code block represents/configures a connection to your REST service
@@ -64,6 +81,37 @@ public class HttpConnect {
         } catch (IOException ex) {
             Log.e(TAG, "IO Exception ");
         }
+
         return null;
+    }
+
+    //Function to check if there is an internet connection
+    private boolean isConnected() {
+        //Test for connection
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        boolean connected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+        //Check type of connection
+        if(connected) {
+            boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+            if (isWiFi) {
+                //Wifi connected, this is fine
+            } else {
+                createToast("Be careful, watching streams on a non-WiFi connection will use a lot of data!");
+            }
+        }
+        return connected;
+    }
+
+    //Have to create toast in UI thread
+    void createToast(String message ) {
+        final String toastText = message;
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, toastText, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
