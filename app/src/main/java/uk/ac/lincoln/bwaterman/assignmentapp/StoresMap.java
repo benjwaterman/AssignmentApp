@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,7 +29,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class StoresMap extends FragmentActivity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, LocationListener {
 
     ArrayList<String> storeList = new ArrayList<>();
     ArrayList<LatLng> latLongList = new ArrayList<>();
@@ -39,6 +41,7 @@ public class StoresMap extends FragmentActivity implements
     boolean isConnected;
     boolean hasLocation;
     private GoogleMap map;
+    private LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,13 @@ public class StoresMap extends FragmentActivity implements
                     .build();
         }
 
+        //Create location request
+        mLocationRequest = new LocationRequest();
+        //10 seconds
+        mLocationRequest.setInterval(30000);
+        //5 seconds
+        mLocationRequest.setFastestInterval(30000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     protected void onStart() {
@@ -67,31 +77,78 @@ public class StoresMap extends FragmentActivity implements
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        //if connected and not already requesting updates
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //Stop listening for location changes when activity is not in focus
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+    protected void startLocationUpdates() {
+        //Test for permission
+        try {
+            //Get current location
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        //Updates when location changed
+        mLastLocation = location;
+        //Update map on location change
+        createMap();
+    }
+
+    @Override
     public void onConnected(Bundle connectionHint) {
+        isConnected = true;
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
+        }
         try {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            //Has got a location
-            if (mLastLocation != null) {
-                hasLocation = true;
-
-                lat = mLastLocation.getLatitude();
-                longi = mLastLocation.getLongitude();
-
-                //Initialise mapFragment
-                MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-                mapFragment.getMapAsync(this);
-
-                //Start json parsing to get nearby stores
-                new AsyncTaskParseJson().execute();
-            }
-            //Has not got a location
-            else {
-                hasLocation = false;
-                onNoConnection();
-            }
-        } catch(SecurityException e)
-        {
+            //Create map on connection
+            createMap();
+        } catch(SecurityException e) {
             e.printStackTrace();
+        }
+    }
+
+    void createMap() {
+        //Clears any current markers on the map
+        if(map != null)
+            map.clear();
+        storeList.clear();
+        latLongList.clear();
+        //If has got a location
+        if (mLastLocation != null) {
+            hasLocation = true;
+
+            lat = mLastLocation.getLatitude();
+            longi = mLastLocation.getLongitude();
+
+            //Initialise mapFragment
+            MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+
+            //Start json parsing to get nearby stores
+            new AsyncTaskParseJson().execute();
+        }
+        //Has not got a location
+        else {
+            hasLocation = false;
+            onNoConnection();
         }
     }
 
@@ -197,7 +254,7 @@ public class StoresMap extends FragmentActivity implements
                 onNoConnection();
             }
 
-            if(map != null) {
+            else if(map != null) {
                 for(int i = 0; i < storeList.size(); i++) {
                     map.addMarker(new MarkerOptions()
                             .position(latLongList.get(i))
