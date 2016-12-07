@@ -263,6 +263,12 @@ public class StoresMap extends FragmentActivity implements
                 }
             }
 
+            //Make sure error text is not showing and that the help text is showing
+            TextView text = (TextView)findViewById(R.id.mapErrorText);
+            text.setVisibility(View.INVISIBLE);
+            text = (TextView) findViewById(R.id.helpText);
+            text.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -278,6 +284,9 @@ public class StoresMap extends FragmentActivity implements
         //If have connection but no location
         if(!hasLocation) {
             text.setText("No location could be found");
+        }
+        else {
+            text.setText("No internet connection");
         }
         text.setVisibility(View.VISIBLE);
         text = (TextView) findViewById(R.id.helpText);

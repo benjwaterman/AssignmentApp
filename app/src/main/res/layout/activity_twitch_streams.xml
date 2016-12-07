@@ -22,7 +22,6 @@
         android:layout_height="match_parent" />
 
     <ImageView
-        app:srcCompat="@color/colorPrimaryDark"
         android:src="@color/colorPrimaryDark"
         android:layout_width="match_parent"
         android:id="@+id/dividerImage"
@@ -48,7 +47,6 @@
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:srcCompat="@drawable/twitch_logo_icon"
         android:src="@drawable/twitch_logo_icon"
         android:id="@+id/twitchLogoIcon"
         android:layout_alignParentTop="true"
