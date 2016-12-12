@@ -204,7 +204,9 @@ public class MainActivity extends Activity {
                 Uri streamPage;
                 try {
                     streamPage = Uri.parse(url);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                    //Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);/
+                    Intent intent = new Intent(MainActivity.this, TwitchChannel.class);
+                    intent.putExtra("channelName", favouritesList.get(position));
                     startActivity(intent);
                 } catch (Exception e) {
                     e.printStackTrace();

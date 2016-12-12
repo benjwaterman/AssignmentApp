@@ -59,146 +59,7 @@ public class TwitchStreams extends Activity {
 
         //replace blank space with + so the url works
         gameName = gameName.replace(" ", "+");
-        new AsyncTaskParseJson().execute();
-    }
-
-    // added asynctask class methods below -  you can make this class as a separate class file
-    class AsyncTaskParseJson extends AsyncTask<String, String, String> {
-
-        // set the url of the web service to call
-        String yourServiceUrl = "https://api.twitch.tv/kraken/streams?game=";
-        ProgressBar progressBar;
-
-        @Override
-        // this method is used for......................
-        protected void onPreExecute() {
-            //Get progress bar
-            progressBar = (ProgressBar) findViewById(R.id.progressStreams);
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        // this method is used for...................
-        protected String doInBackground(String... arg0) {
-
-            try {
-                // create new instance of the httpConnect class
-                HttpConnect jParser = new HttpConnect();
-
-                // get json string from service url
-                String json = jParser.getJSONFromUrl(yourServiceUrl + gameName, getApplicationContext());
-
-                //If no data was returned or string is null, set connection to false and return out of function
-                if(json == null || json.length() == 0) {
-                    isConnected = false;
-                    return null;
-                }
-                isConnected = true;
-
-                //base object, contains everything
-                JSONObject jsonObject = new JSONObject(json);
-                //array from object with specified name
-                JSONArray jsonArray = jsonObject.optJSONArray("streams");
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    //get json object from array
-                    JSONObject subObject = jsonArray.getJSONObject(i);
-
-                    if (subObject != null) {
-                        //add each tweet to ArrayList as an item
-                        String nameToAdd;
-                        String viewersToAdd;
-                        String followersToAdd;
-                        String snapshotUrlToAdd;
-                        String urlToAdd;
-                        try {
-                            nameToAdd = subObject.getJSONObject("channel").getString("display_name");// + " currently has " + subObject.getString("viewers") + " viewers.";
-                            channelNameList.add(nameToAdd);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            viewersToAdd = subObject.getString("viewers");
-                            channelViewersList.add(viewersToAdd);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            followersToAdd = subObject.getJSONObject("channel").getString("followers");
-                            channelFollowerList.add(followersToAdd);
-                            textList.add("<b>" + channelNameList.get(i) + "</b><br>" + channelViewersList.get(i) + " viewers<br>" + channelFollowerList.get(i) + " followers");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            snapshotUrlToAdd = subObject.getJSONObject("preview").getString("medium");
-                            //add the name of the game to the url
-                            channelSnapshotList.add(snapshotUrlToAdd);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            urlToAdd = subObject.getJSONObject("channel").getString("url");
-                            //add the name of the game to the url
-                            channelUrlList.add(urlToAdd);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } catch (Exception e) {//(JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        // below method will run when service HTTP request is complete, will then bind tweet text in arrayList to ListView
-        protected void onPostExecute(String strFromDoInBg) {
-            //If not connected, set not connected text to visible and return out of function
-            if(!isConnected) {
-                TextView text = (TextView)findViewById(R.id.noConnectionText);
-                text.setVisibility(View.VISIBLE);
-                return;
-            }
-
-            //Find grid view stuff
-            GridView gridview = (GridView) findViewById(R.id.channelGridView);
-            //Set adapter to custom adapter
-            gridview.setAdapter(new GridAdapter(TwitchStreams.this, textList, channelSnapshotList, channelNameList, true));
-            //Set it to be long clickable to add to favourites
-            gridview.setLongClickable(true);
-            //Register for context menu
-            registerForContextMenu(gridview);
-
-            //Open the link to the stream
-            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    String url = channelUrlList.get(position);
-                    //Add to times viewed
-                    Cursor cursor = databaseHelper.getNameMatches(channelNameList.get(position));
-                    if(cursor.getCount() > 0) {
-                        cursor.moveToPosition(0);
-                        databaseHelper.updateTimesViewed(cursor);
-                        cursor.close();
-                    }
-                    Uri streamPage;
-                    try {
-                        //streamPage = Uri.parse(url);
-                        //Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
-                        Intent intent = new Intent(TwitchStreams.this, TwitchChannel.class);
-                        intent.putExtra("channelName", channelNameList.get(position));
-                        intent.putExtra("channelFollowers", channelFollowerList.get(position));
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-            //Complete progress spinner after done loading
-            progressBar.setVisibility(View.INVISIBLE);
-        }
+        new ParseJsonStreams().execute();
     }
 
     public void findGameStores(View view)
@@ -289,6 +150,142 @@ public class TwitchStreams extends Activity {
 
             default:
                 return super.onContextItemSelected(item);
+        }
+    }
+
+    // Async method to parse json data about streams
+    class ParseJsonStreams extends AsyncTask<String, String, String> {
+
+        // set the url of the web service to call
+        String yourServiceUrl = "https://api.twitch.tv/kraken/streams?game=";
+        ProgressBar progressBar;
+
+        @Override
+        protected void onPreExecute() {
+            //Get progress bar
+            progressBar = (ProgressBar) findViewById(R.id.progressStreams);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected String doInBackground(String... arg0) {
+
+            try {
+                // create new instance of the httpConnect class
+                HttpConnect jParser = new HttpConnect();
+
+                // get json string from service url
+                String json = jParser.getJSONFromUrl(yourServiceUrl + gameName, getApplicationContext());
+
+                //If no data was returned or string is null, set connection to false and return out of function
+                if(json == null || json.length() == 0) {
+                    isConnected = false;
+                    return null;
+                }
+                isConnected = true;
+
+                //base object, contains everything
+                JSONObject jsonObject = new JSONObject(json);
+                //array from object with specified name
+                JSONArray jsonArray = jsonObject.optJSONArray("streams");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    //get json object from array
+                    JSONObject subObject = jsonArray.getJSONObject(i);
+
+                    if (subObject != null) {
+                        //add each tweet to ArrayList as an item
+                        String nameToAdd;
+                        String viewersToAdd;
+                        String followersToAdd;
+                        String snapshotUrlToAdd;
+                        String urlToAdd;
+                        try {
+                            nameToAdd = subObject.getJSONObject("channel").getString("display_name");// + " currently has " + subObject.getString("viewers") + " viewers.";
+                            channelNameList.add(nameToAdd);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            viewersToAdd = subObject.getString("viewers");
+                            channelViewersList.add(viewersToAdd);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            followersToAdd = subObject.getJSONObject("channel").getString("followers");
+                            channelFollowerList.add(followersToAdd);
+                            textList.add("<b>" + channelNameList.get(i) + "</b><br>" + channelViewersList.get(i) + " viewers<br>" + channelFollowerList.get(i) + " followers");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            snapshotUrlToAdd = subObject.getJSONObject("preview").getString("medium");
+                            //add the name of the game to the url
+                            channelSnapshotList.add(snapshotUrlToAdd);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            urlToAdd = subObject.getJSONObject("channel").getString("url");
+                            //add the name of the game to the url
+                            channelUrlList.add(urlToAdd);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String strFromDoInBg) {
+            //If not connected, set not connected text to visible and return out of function
+            if(!isConnected) {
+                TextView text = (TextView)findViewById(R.id.noConnectionText);
+                text.setVisibility(View.VISIBLE);
+                return;
+            }
+
+            //Find grid view stuff
+            GridView gridview = (GridView) findViewById(R.id.channelGridView);
+            //Set adapter to custom adapter
+            gridview.setAdapter(new GridAdapter(TwitchStreams.this, textList, channelSnapshotList, channelNameList, true));
+            //Set it to be long clickable to add to favourites
+            gridview.setLongClickable(true);
+            //Register for context menu
+            registerForContextMenu(gridview);
+
+            //Open the link to the stream
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    String url = channelUrlList.get(position);
+                    //Add to times viewed
+                    Cursor cursor = databaseHelper.getNameMatches(channelNameList.get(position));
+                    if(cursor.getCount() > 0) {
+                        cursor.moveToPosition(0);
+                        databaseHelper.updateTimesViewed(cursor);
+                        cursor.close();
+                    }
+                    Uri streamPage;
+                    try {
+                        //streamPage = Uri.parse(url);
+                        //Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                        Intent intent = new Intent(TwitchStreams.this, TwitchChannel.class);
+                        intent.putExtra("channelName", channelNameList.get(position));
+                        intent.putExtra("channelFollowers", channelFollowerList.get(position));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            //Complete progress spinner after done loading
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 

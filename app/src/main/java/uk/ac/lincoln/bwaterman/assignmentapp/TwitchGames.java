@@ -34,12 +34,11 @@ public class TwitchGames extends Activity {
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.VISIBLE);
 
-        // start the  AsyncTask for calling the REST service using httpConnect class
-        new AsyncTaskParseJson().execute();
+        //
+        new ParseJsonGames().execute();
     }
 
-    // added asynctask class methods below -  you can make this class as a separate class file
-    class AsyncTaskParseJson extends AsyncTask<String, String, String> {
+    class ParseJsonGames extends AsyncTask<String, String, String> {
 
         // set the url of the web service to call
         String yourServiceUrl = "https://api.twitch.tv/kraken/games/top?limit=20";
@@ -54,14 +53,13 @@ public class TwitchGames extends Activity {
         }
 
         @Override
-        // this method is used for...................
         protected String doInBackground(String... arg0)  {
 
             try {
                 // create new instance of the httpConnect class
                 HttpConnect jParser = new HttpConnect();
 
-                // get json string from service url
+                // get json string from url
                 String json = jParser.getJSONFromUrl(yourServiceUrl, getApplicationContext());
 
                 //If no data was returned or string is null, set connection to false and return out of function
@@ -76,7 +74,7 @@ public class TwitchGames extends Activity {
 
                 JSONArray jsonArray = jsonObject.optJSONArray("top");
 
-                // loop through json array and add each tweet to item in arrayList
+                // add data to relevant variables
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject json_message = jsonArray.getJSONObject(i);
 
@@ -108,19 +106,15 @@ public class TwitchGames extends Activity {
                         catch(Exception e){
                             e.printStackTrace();
                         }
-
-                        //items.add(json_message.getJSONObject("game").getString("name"));
-                        //items.add(json_message.getString("viewers"));
                     }
                 }
-            } catch (Exception e) {//(JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
         }
 
         @Override
-        // below method will run when service HTTP request is complete, will then bind tweet text in arrayList to ListView
         protected void onPostExecute(String strFromDoInBg) {
             //If not connected, set not connected text to visible and return out of function
             if(!isConnected) {

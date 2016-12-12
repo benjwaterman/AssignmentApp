@@ -22,6 +22,8 @@ public class HttpConnect {
     static String json = "";
     //store context
     Context context;
+    //store whether data warning has already been displayed
+    boolean hasWarned = false;
 
     // your android activity will call this method and pass in the url of the REST service
     public String getJSONFromUrl(String url, Context _context) {
@@ -98,7 +100,11 @@ public class HttpConnect {
             if (isWiFi) {
                 //Wifi connected, this is fine
             } else {
-                createToast("Be careful, watching streams on a non-WiFi connection will use a lot of data!");
+                if(!hasWarned) {
+                    createToast("Be careful, watching streams on a non-WiFi connection will use a lot of data!");
+                    //so we don't get a warning on every activity
+                    hasWarned = true;
+                }
             }
         }
         return connected;
