@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_twitch_channel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="uk.ac.lincoln.bwaterman.assignmentapp.TwitchChannel">
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressChannel"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Channel Name"
+        android:id="@+id/channelTitleText"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_height="120dp"
+        android:textColor="?android:attr/textColorTertiary" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/twitch_logo_icon"
+        android:id="@+id/twitchLogoIcon"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="No internet connection"
+        android:id="@+id/noConnectionText"
+        android:background="@android:color/holo_red_dark"
+        android:textAlignment="center"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:alpha="0.9"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:padding="5dp"
+        android:visibility="invisible"
+        android:textColor="@android:color/white"
+        android:textStyle="normal|bold" />
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@color/colorAccent"
+        android:id="@+id/channelLogo"
+        android:layout_below="@+id/channelBanner"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp" />
+
+    <Switch
+        android:text="Favourite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/favouriteSwitch"
+        android:layout_below="@+id/channelBanner"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:src="@color/colorPrimary"
+        android:id="@+id/channelBanner"
+        android:layout_height="100dp"
+        android:layout_below="@+id/channelTitleText"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="20000 followers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="19dp"
+        android:id="@+id/channelSubtitleText"
+        android:layout_above="@+id/channelBanner"
+        android:layout_centerHorizontal="true" />
+
+    <TabHost
+        android:layout_width="match_parent"
+        android:layout_height="300dip"
+        android:layout_below="@+id/channelLogo"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="18dp"
+        android:id="@+id/channelTabs">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/infoTab"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:text="info tab"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView3" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/videosTab"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:text="videos tab"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView4" />
+                </LinearLayout>
+
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+
+    <TextView
+        android:text="Offline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/statusText"
+        android:layout_alignTop="@+id/channelLogo"
+        android:layout_toEndOf="@+id/channelLogo"
+        android:layout_marginLeft="10dp" />
+
+    <TextView
+        android:text="TestChannelName"
+        android:layout_width="wrap_content"
+        android:id="@+id/channelName"
+        android:textSize="18sp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_below="@+id/statusText"
+        android:layout_toEndOf="@+id/channelLogo" />
+
+    <Button
+        android:text="Watch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/watchStreamButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        android:layout_alignBottom="@+id/progressChannel"
+        android:layout_alignEnd="@+id/favouriteSwitch" />
+
+</RelativeLayout>

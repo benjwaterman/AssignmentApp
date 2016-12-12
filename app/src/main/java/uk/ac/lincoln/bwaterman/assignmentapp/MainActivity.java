@@ -38,11 +38,6 @@ public class MainActivity extends Activity {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
 
-        ImageLoader imageLoader = ImageLoader.getInstance();
-        //String imageUrl = "http://java.sogeti.nl/JavaBlog/wp-content/uploads/2009/04/android_icon_256.png";
-        //ImageView tempImage = (ImageView)findViewById(R.id.pictureView);
-        //imageLoader.displayImage(imageUrl, tempImage);
-
         databaseHelper = new DatabaseHelper(this);
 
         ListView listView = (ListView) findViewById(R.id.favouritesListView);

@@ -184,8 +184,11 @@ public class TwitchStreams extends Activity {
                     }
                     Uri streamPage;
                     try {
-                        streamPage = Uri.parse(url);
-                        Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                        //streamPage = Uri.parse(url);
+                        //Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                        Intent intent = new Intent(TwitchStreams.this, TwitchChannel.class);
+                        intent.putExtra("channelName", channelNameList.get(position));
+                        intent.putExtra("channelFollowers", channelFollowerList.get(position));
                         startActivity(intent);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -229,8 +232,16 @@ public class TwitchStreams extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
-            //Open stream
+            //Open channel info
             case R.id.view:
+                Intent intent = new Intent(TwitchStreams.this, TwitchChannel.class);
+                intent.putExtra("channelName", channelNameList.get(info.position));
+                intent.putExtra("channelFollowers", channelFollowerList.get(info.position));
+                startActivity(intent);
+                return true;
+
+            //Open stream
+            case R.id.watch:
                 String url = channelUrlList.get(info.position);
                 //If name is in favourites, add to times viewed
                 Cursor cursor = databaseHelper.getNameMatches(channelNameList.get(info.position));
@@ -242,12 +253,13 @@ public class TwitchStreams extends Activity {
                 Uri streamPage;
                 try {
                     streamPage = Uri.parse(url);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                    intent = new Intent(Intent.ACTION_VIEW, streamPage);
                     startActivity(intent);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return true;
+
             //Add to favourites
             case R.id.add:
                 try {
