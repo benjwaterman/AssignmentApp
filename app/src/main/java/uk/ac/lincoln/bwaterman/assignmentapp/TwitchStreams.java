@@ -75,6 +75,7 @@ public class TwitchStreams extends Activity {
             menu.setHeaderTitle(channelNameList.get(info.position));
             MenuInflater inflater = getMenuInflater();
 
+            //Check if streamer is in favourites
             Cursor cursor = databaseHelper.getNameMatches(channelNameList.get(info.position));
             //If results are returned then streamer is already in favourites
             if(cursor.getCount() > 0)

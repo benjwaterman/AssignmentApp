@@ -1,13 +1,17 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -32,6 +36,9 @@ public class TwitchChannel extends AppCompatActivity {
     String bannerUrl;
     String channelUrl;
     String views;
+
+    //Database
+    DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,15 +70,89 @@ public class TwitchChannel extends AppCompatActivity {
             //Channel name
             textView = (TextView) findViewById(R.id.channelName);
             textView.setText(channelName);
+            textView = (TextView) findViewById(R.id.channelName2);
+            textView.setText("Name: " + channelName);
         }
         if(channelFollowers != null && !Objects.equals(channelFollowers, "")) {
             //Subtitle/viewers
             TextView textView = (TextView) findViewById(R.id.channelSubtitleText);
             textView.setText(channelFollowers + " followers");
+            textView = (TextView) findViewById(R.id.channelFollowers2);
+            textView.setText("Followers: " + channelFollowers);
         }
+
+        databaseHelper = new DatabaseHelper(this);
+
+        //Check if streamer is in favourites
+        Cursor cursor = databaseHelper.getNameMatches(channelName);
+        //Get switch
+        Switch favouritesSwitch = (Switch) findViewById(R.id.favouriteSwitch);
+        //If results are returned then streamer is in favourites
+        if(cursor.getCount() > 0)
+        {
+            favouritesSwitch.setChecked(true);
+        }
+        //Not in favourites
+        else
+        {
+            favouritesSwitch.setChecked(false);
+        }
+
+        //Set listener if switch is checked or unchecked
+        favouritesSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                //Is switched on, add to favourites
+                if(isChecked) {
+                    //Uses async task as it can be a bit resource heavy on main thread
+                    new AddFavourite().execute();
+                }
+                //Is switched off, remove from favourites
+                else {
+                    new RemoveFavourite().execute();
+                }
+            }
+        });
 
         //call async task to parse json
         new ParseJsonChannel().execute();
+    }
+
+    //Add to favourites asynchronously
+    class AddFavourite extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                boolean isInserted = databaseHelper.insertData(channelName, channelUrl, "0");
+                if(isInserted)
+                    Toast.makeText(TwitchChannel.this,"Favourite added!",Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(TwitchChannel.this,"An error occurred: favourite not added",Toast.LENGTH_SHORT).show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    //Remove from favourites asynchronously
+    class RemoveFavourite extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                int result = databaseHelper.deleteData(channelName);
+                if(result > 0)
+                    Toast.makeText(TwitchChannel.this,"Favourite removed!",Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(TwitchChannel.this,"An error occurred: favourite not deleted",Toast.LENGTH_SHORT).show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     class ParseJsonChannel extends AsyncTask<String, String, String> {
@@ -158,6 +239,7 @@ public class TwitchChannel extends AppCompatActivity {
                 return;
             }
 
+            //Assign live status
             TextView textView = (TextView)findViewById(R.id.statusText);
             if(liveStatus) {
                 textView.setText("LIVE");
@@ -169,18 +251,47 @@ public class TwitchChannel extends AppCompatActivity {
                 ImageView imageView = (ImageView)findViewById(R.id.statusImage);
                 imageView.setImageResource(presence_invisible);
             }
+
+            //Assign followers
             textView = (TextView)findViewById(R.id.channelSubtitleText);
             textView.setText(channelFollowers + " followers");
+            textView = (TextView) findViewById(R.id.channelFollowers2);
+            textView.setText("Followers: " + channelFollowers);
 
+            //Assign logo
             if(logoUrl != null && !Objects.equals(logoUrl, "")) {
                 ImageView imageView = (ImageView) findViewById(R.id.channelLogo);
                 imageLoader.displayImage(logoUrl, imageView);
             }
 
+            //Assign banner
             if(bannerUrl != null && !Objects.equals(bannerUrl, "")) {
                 ImageView imageView = (ImageView) findViewById(R.id.channelBanner);
                 imageLoader.displayImage(bannerUrl, imageView);
             }
+
+            //Set if channel is mature
+            textView = (TextView) findViewById(R.id.matureText);
+            if(isMature) {
+                textView.setText("Mature: True");
+            }
+            else {
+                textView.setText("Mature: False");
+            }
+
+            //Assign game
+            if(game != null && !Objects.equals(game, "")) {
+                textView = (TextView) findViewById(R.id.gameText);
+                textView.setText("Last game played: " + game);
+            }
+
+            //Assign views
+            if(views != null && !Objects.equals(views, "")) {
+                textView = (TextView) findViewById(R.id.viewsText);
+                textView.setText("Total views: " + views);
+            }
+
+            //GET VIDEO IMAGE URLS AND ADD IMAGEVIEW TO LINEAR LAYOUT UNDER HORIZ SCROLL VIEW
 
             //Complete progress spinner after done loading
             progressBar.setVisibility(View.INVISIBLE);
