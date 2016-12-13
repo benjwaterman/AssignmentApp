@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TabHost;
@@ -15,8 +16,10 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static android.R.drawable.presence_invisible;
@@ -36,6 +39,8 @@ public class TwitchChannel extends AppCompatActivity {
     String bannerUrl;
     String channelUrl;
     String views;
+    ArrayList<String> videoUrlList = new ArrayList<>();
+    ArrayList<String> videoThumbList = new ArrayList<>();
 
     //Database
     DatabaseHelper databaseHelper;
@@ -159,6 +164,8 @@ public class TwitchChannel extends AppCompatActivity {
 
         // API url for channel
         String yourServiceUrl = "https://api.twitch.tv/kraken/channels/" + channelName;
+        //Url for videos from channel
+        String getVideosUrl = "https://api.twitch.tv/kraken/channels/" + channelName + "/videos?limit=10" + "?broadcasts=true";
         ProgressBar progressBar;
 
         //Setup imageloader
@@ -180,6 +187,8 @@ public class TwitchChannel extends AppCompatActivity {
 
                 // get json string from url
                 String json = jParser.getJSONFromUrl(yourServiceUrl, getApplicationContext());
+                // Get json for videos
+                String jsonVideos = jParser.getJSONFromUrl(getVideosUrl, getApplicationContext());
 
                 //If no data was returned or string is null, set connection to false and return out of function
                 if(json == null || json.length() == 0) {
@@ -206,8 +215,23 @@ public class TwitchChannel extends AppCompatActivity {
                     isConnected = false;
                 }
 
-                //If connected check whether channel is currently live
+                //If connected
                 if(isConnected) {
+                    JSONObject jsonVideoObject = new JSONObject(jsonVideos);
+                    //If there are videos to get
+                    if (jsonVideoObject.length() != 0) {
+                        JSONArray videoArray = jsonVideoObject.getJSONArray("videos");
+
+                        //Loop through each video
+                        for (int i = 0; i < videoArray.length(); i++) {
+                            JSONObject json_message = videoArray.getJSONObject(i);
+                            //Get video url and add it to list
+                            videoUrlList.add(json_message.getString("url"));
+                            videoThumbList.add(json_message.getString("preview"));
+                        }
+                    }
+
+
                     //Get whether channel is currently live
                     String liveCheckUrl = "https://api.twitch.tv/kraken/streams/" + channelName;
                     json = jParser.getJSONFromUrl(liveCheckUrl, getApplicationContext());
@@ -292,6 +316,29 @@ public class TwitchChannel extends AppCompatActivity {
             }
 
             //GET VIDEO IMAGE URLS AND ADD IMAGEVIEW TO LINEAR LAYOUT UNDER HORIZ SCROLL VIEW
+            LinearLayout layout = (LinearLayout)findViewById(R.id.videoThumbLayout);
+            if(videoThumbList.size() != 0) {
+                //Loop through list
+                for(int i=0; i < videoThumbList.size(); i++)
+                {
+                    ImageView imageView = new ImageView(TwitchChannel.this);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    //Convert pixel to dp
+                    int marginSize = (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 5;
+                    //Set margin
+                    layoutParams.setMargins(marginSize, marginSize, marginSize, marginSize);
+
+                    imageView.setLayoutParams(layoutParams);
+                    imageView.setLayoutParams(layoutParams);
+                    //imageView.setMaxHeight(100);
+                    //imageView.setMaxWidth(100);
+
+                    imageLoader.displayImage(videoThumbList.get(i), imageView);
+
+                    // Adds imageview to layout
+                    layout.addView(imageView);
+                }
+            }
 
             //Complete progress spinner after done loading
             progressBar.setVisibility(View.INVISIBLE);

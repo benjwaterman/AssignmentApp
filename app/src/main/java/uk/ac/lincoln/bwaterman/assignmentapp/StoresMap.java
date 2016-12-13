@@ -59,9 +59,9 @@ public class StoresMap extends FragmentActivity implements
 
         //Create location request
         mLocationRequest = new LocationRequest();
-        //10 seconds
+        //30 seconds
         mLocationRequest.setInterval(30000);
-        //5 seconds
+        //30 seconds
         mLocationRequest.setFastestInterval(30000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
