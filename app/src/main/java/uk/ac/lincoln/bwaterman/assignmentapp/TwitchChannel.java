@@ -1,6 +1,8 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -76,14 +78,14 @@ public class TwitchChannel extends AppCompatActivity {
             textView = (TextView) findViewById(R.id.channelName);
             textView.setText(channelName);
             textView = (TextView) findViewById(R.id.channelName2);
-            textView.setText("Name: " + channelName);
+            textView.setText(channelName);
         }
         if(channelFollowers != null && !Objects.equals(channelFollowers, "")) {
             //Subtitle/viewers
             TextView textView = (TextView) findViewById(R.id.channelSubtitleText);
             textView.setText(channelFollowers + " followers");
             textView = (TextView) findViewById(R.id.channelFollowers2);
-            textView.setText("Followers: " + channelFollowers);
+            textView.setText(channelFollowers);
         }
 
         databaseHelper = new DatabaseHelper(this);
@@ -160,12 +162,13 @@ public class TwitchChannel extends AppCompatActivity {
         }
     }
 
+    //Get json for channel
     class ParseJsonChannel extends AsyncTask<String, String, String> {
 
         // API url for channel
         String yourServiceUrl = "https://api.twitch.tv/kraken/channels/" + channelName;
         //Url for videos from channel
-        String getVideosUrl = "https://api.twitch.tv/kraken/channels/" + channelName + "/videos?limit=10" + "?broadcasts=true";
+        String getVideosUrl = "https://api.twitch.tv/kraken/channels/" + channelName + "/videos?limit=10" + "&broadcasts=true";
         ProgressBar progressBar;
 
         //Setup imageloader
@@ -212,25 +215,28 @@ public class TwitchChannel extends AppCompatActivity {
                     channelFollowers = jsonObject.getString("followers");
                 }
                 else {
+                    //If json returns nothing, we're probably not connected to the internet
                     isConnected = false;
                 }
 
-                //If connected
+                //If connected attempt to get json
                 if(isConnected) {
-                    JSONObject jsonVideoObject = new JSONObject(jsonVideos);
-                    //If there are videos to get
-                    if (jsonVideoObject.length() != 0) {
-                        JSONArray videoArray = jsonVideoObject.getJSONArray("videos");
+                    //Check something has been returned
+                    if(jsonVideos != null && jsonVideos.length() != 0) {
+                        JSONObject jsonVideoObject = new JSONObject(jsonVideos);
+                        //If there are videos to get
+                        if (jsonVideoObject.length() != 0) {
+                            JSONArray videoArray = jsonVideoObject.getJSONArray("videos");
 
-                        //Loop through each video
-                        for (int i = 0; i < videoArray.length(); i++) {
-                            JSONObject json_message = videoArray.getJSONObject(i);
-                            //Get video url and add it to list
-                            videoUrlList.add(json_message.getString("url"));
-                            videoThumbList.add(json_message.getString("preview"));
+                            //Loop through each video
+                            for (int i = 0; i < videoArray.length(); i++) {
+                                JSONObject json_message = videoArray.getJSONObject(i);
+                                //Get video url and add it to list
+                                videoUrlList.add(json_message.getString("url"));
+                                videoThumbList.add(json_message.getString("preview"));
+                            }
                         }
                     }
-
 
                     //Get whether channel is currently live
                     String liveCheckUrl = "https://api.twitch.tv/kraken/streams/" + channelName;
@@ -280,7 +286,7 @@ public class TwitchChannel extends AppCompatActivity {
             textView = (TextView)findViewById(R.id.channelSubtitleText);
             textView.setText(channelFollowers + " followers");
             textView = (TextView) findViewById(R.id.channelFollowers2);
-            textView.setText("Followers: " + channelFollowers);
+            textView.setText(channelFollowers);
 
             //Assign logo
             if(logoUrl != null && !Objects.equals(logoUrl, "")) {
@@ -289,7 +295,7 @@ public class TwitchChannel extends AppCompatActivity {
             }
 
             //Assign banner
-            if(bannerUrl != null && !Objects.equals(bannerUrl, "")) {
+            if(bannerUrl != null && !Objects.equals(bannerUrl, "") && !Objects.equals(bannerUrl, "null")) {
                 ImageView imageView = (ImageView) findViewById(R.id.channelBanner);
                 imageLoader.displayImage(bannerUrl, imageView);
             }
@@ -297,46 +303,60 @@ public class TwitchChannel extends AppCompatActivity {
             //Set if channel is mature
             textView = (TextView) findViewById(R.id.matureText);
             if(isMature) {
-                textView.setText("Mature: True");
+                textView.setText("True");
             }
             else {
-                textView.setText("Mature: False");
+                textView.setText("False");
             }
 
             //Assign game
             if(game != null && !Objects.equals(game, "")) {
                 textView = (TextView) findViewById(R.id.gameText);
-                textView.setText("Last game played: " + game);
+                textView.setText(game);
             }
 
             //Assign views
             if(views != null && !Objects.equals(views, "")) {
                 textView = (TextView) findViewById(R.id.viewsText);
-                textView.setText("Total views: " + views);
+                textView.setText(views);
             }
 
-            //GET VIDEO IMAGE URLS AND ADD IMAGEVIEW TO LINEAR LAYOUT UNDER HORIZ SCROLL VIEW
+            //
             LinearLayout layout = (LinearLayout)findViewById(R.id.videoThumbLayout);
             if(videoThumbList.size() != 0) {
                 //Loop through list
                 for(int i=0; i < videoThumbList.size(); i++)
                 {
-                    ImageView imageView = new ImageView(TwitchChannel.this);
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    //Convert pixel to dp
-                    int marginSize = (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 5;
-                    //Set margin
-                    layoutParams.setMargins(marginSize, marginSize, marginSize, marginSize);
+                    //Check theres something to display
+                    if(videoThumbList.get(i) != null && !Objects.equals(videoThumbList.get(i), "")) {
+                        ImageView imageView = new ImageView(TwitchChannel.this);
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        //Convert pixel to dp
+                        int marginSize = (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 5;
+                        //Set margin
+                        layoutParams.setMargins(marginSize, marginSize, marginSize, marginSize);
 
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setLayoutParams(layoutParams);
-                    //imageView.setMaxHeight(100);
-                    //imageView.setMaxWidth(100);
+                        imageView.setLayoutParams(layoutParams);
+                        imageView.setLayoutParams(layoutParams);
 
-                    imageLoader.displayImage(videoThumbList.get(i), imageView);
+                        //On an on click listener to each picture so if its clicked it goes to that video
+                        final String url = videoUrlList.get(i);
+                        imageView.setOnClickListener(new ImageView.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Uri streamPage = Uri.parse(url);
+                                Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                                startActivity(intent);
+                            }
+                        });
+                        //imageView.setMaxHeight(100);
+                        //imageView.setMaxWidth(100);
 
-                    // Adds imageview to layout
-                    layout.addView(imageView);
+                        imageLoader.displayImage(videoThumbList.get(i), imageView);
+
+                        // Adds imageview to layout
+                        layout.addView(imageView);
+                    }
                 }
             }
 
