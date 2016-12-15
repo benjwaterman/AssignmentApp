@@ -23,7 +23,7 @@ public class HttpConnect {
     //store context
     Context context;
     //store whether data warning has already been displayed
-    boolean hasWarned = false;
+    static boolean hasWarned = false;
 
     // your android activity will call this method and pass in the url of the REST service
     public String getJSONFromUrl(String url, Context _context) {

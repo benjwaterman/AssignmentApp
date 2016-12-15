@@ -32,9 +32,9 @@ public class GridAdapter extends BaseAdapter {
         imageUrlList = _imageUrlList;
         titleList = _titleList;
         isLarge = _isLarge;
-        fileHelper = new FileHelper();
+        fileHelper = new FileHelper(c);
 
-        if(imageLoader == null)
+        if (imageLoader == null)
             imageLoader = ImageLoader.getInstance();
     }
 
@@ -63,7 +63,7 @@ public class GridAdapter extends BaseAdapter {
 
             grid = new View(mContext);
             //Use different layout for different activities
-            if(isLarge)
+            if (isLarge)
                 grid = inflater.inflate(R.layout.grid_single_large, null);
             else
                 grid = inflater.inflate(R.layout.grid_single, null);
@@ -72,12 +72,13 @@ public class GridAdapter extends BaseAdapter {
         }
 
         TextView textView = (TextView) grid.findViewById(R.id.grid_text);
-        final ImageView imageView = (ImageView)grid.findViewById(R.id.grid_image);
+        final ImageView imageView = (ImageView) grid.findViewById(R.id.grid_image);
 
         //Show progress spinner while image loads
-        final ProgressBar progressBar = (ProgressBar)grid.findViewById(R.id.progress);
+        final ProgressBar progressBar = (ProgressBar) grid.findViewById(R.id.progress);
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.VISIBLE);
+        progressBar.bringToFront();
 
         //Use fromHtml in order to get multiple styles within one textView (such as bold and non bold text)
         textView.setText(Html.fromHtml(textList.get(position)));
@@ -85,18 +86,17 @@ public class GridAdapter extends BaseAdapter {
 
         //Name folder depending on if games or streamers
         String folderName;
-        if(isLarge) {
+        if (isLarge) {
             //For streamers
             folderName = "streamers";
-        }
-        else {
+        } else {
             //For games
             folderName = "games";
         }
 
         //Save subfolder name as title of stream/game
         String subFolderName = titleList.get(position);
-        //Replace blank space
+        //Replace blank space, this is to make the files work with ImageLoader as it doesn't accept certain characters in the file name
         subFolderName = subFolderName.replace(" ", "%");
         //Replace any "/"
         subFolderName = subFolderName.replace("/", "%");
@@ -121,7 +121,7 @@ public class GridAdapter extends BaseAdapter {
         final String finalFileName = fileName;
 
         //If there is no file, download it, display it and save it to internal storage
-        if(!file.exists()) {
+        if (!file.exists()) {
             try {
                 //Load image, after image has been loaded hide the progress spinner
                 imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
@@ -144,7 +144,6 @@ public class GridAdapter extends BaseAdapter {
         else {
             try {
                 //Local path for imageloader to load image from
-                //imageUrl = "file://" + file.getCanonicalPath();
                 imageUrl = "file://" + fileHelper.getFilePath(mContext, finalFileName, finalFolderName, finalSubFolderName);
 
                 //Load image, after image has been loaded hide the progress spinner
@@ -163,5 +162,3 @@ public class GridAdapter extends BaseAdapter {
         return grid;
     }
 }
-
-

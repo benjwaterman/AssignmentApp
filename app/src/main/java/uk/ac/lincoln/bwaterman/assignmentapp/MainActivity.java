@@ -1,7 +1,6 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,10 +18,7 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -30,6 +26,7 @@ public class MainActivity extends Activity {
 
     DatabaseHelper databaseHelper;
     ArrayList<String> favouritesList = new ArrayList<>();
+    FileHelper fileHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +36,7 @@ public class MainActivity extends Activity {
         ImageLoader.getInstance().init(config);
 
         databaseHelper = new DatabaseHelper(this);
+        fileHelper = new FileHelper(getApplicationContext());
 
         ListView listView = (ListView) findViewById(R.id.favouritesListView);
         //Register for context menu
@@ -63,105 +61,33 @@ public class MainActivity extends Activity {
 
     //Clear images function
     public void clearImageData(View view) {
-        Context context = getApplicationContext();
-        //Check savedImages.txt exists, if not exit function
-        File file = new File(context.getFilesDir(), "savedImages.txt");
-        if (!file.exists()) {
-            CharSequence text = "No image data to delete!";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-            return;
-        }
 
         //Delete files
         try {
-            FileInputStream input = openFileInput("savedImages.txt");
-            InputStreamReader streamReader = new InputStreamReader(input);
-            BufferedReader bufferedReader = new BufferedReader(streamReader);
+            boolean success1, success2;
+            success1 = fileHelper.deleteFile(new File(getFilesDir(), "streamers"));
+            success2 = fileHelper.deleteFile(new File(getFilesDir(), "games"));
 
-            String readString = bufferedReader.readLine();
-            //While there is text being read in, aka not end of file
-            while (readString != null) {
-                //Check file exists, if it does delete it
-                file = new File(context.getFilesDir(), readString);
-                if(file.exists()) {
-                    context.deleteFile(readString);
-                    readString = bufferedReader.readLine() ;
-                }
-                else {
-                    readString = bufferedReader.readLine() ;
-                }
+            if(success1 && success2) {
+                Toast.makeText(getApplicationContext(), "Image data deleted!", Toast.LENGTH_SHORT).show();
             }
-
-            //Close input streams
-            input.close();
-            streamReader.close();
-            bufferedReader.close();
-
-            //After all images have been deleted, delete savedImages.txt as it will be regenerated when the next images are loaded
-            context.deleteFile("savedImages.txt");
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
-        CharSequence text = "Image data deleted!";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-
         updateImageDataSize();
     }
 
+    //Updates text with image data size
     void updateImageDataSize() {
         //Update space used text
         TextView spaceUsedTV = (TextView) findViewById(R.id.spaceUsedText);
-        String spaceUsed = getImageDataSize();
+        //Get size of folders
+        Float size = fileHelper.getImageDataSize(new File(getFilesDir(), "streamers")) + fileHelper.getImageDataSize(new File(getFilesDir(), "games"));
+        //Convert to MB and format to string
+        String spaceUsed = String.format(Locale.ENGLISH, "%.2f", size / 1000000);
         spaceUsedTV.setText(spaceUsed + " MB used");
-    }
-
-    String getImageDataSize() {
-        Context context = getApplicationContext();
-        float bytes = 0;
-        //Check savedImages.txt exists, if not exit function returning 0 bytes used
-        File file = new File(context.getFilesDir(), "savedImages.txt");
-        if (!file.exists()) {
-            return "0";
-        }
-
-        //Delete files
-        try {
-            FileInputStream input = openFileInput("savedImages.txt");
-            InputStreamReader streamReader = new InputStreamReader(input);
-            BufferedReader bufferedReader = new BufferedReader(streamReader);
-
-            String readString = bufferedReader.readLine();
-            //While there is text being read in, aka not end of file
-            while (readString != null) {
-                //Check file exists, if it does delete it
-                file = new File(context.getFilesDir(), readString);
-                if (file.exists()) {
-                    bytes += file.length();
-                    readString = bufferedReader.readLine();
-                } else {
-                    readString = bufferedReader.readLine();
-                }
-            }
-
-            //Close input streams
-            input.close();
-            streamReader.close();
-            bufferedReader.close();
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-
-        //Convert to MB
-        return String.format(Locale.ENGLISH, "%.2f", bytes / 1000000);
     }
 
     void showFavourites(ArrayList<String> Message) {

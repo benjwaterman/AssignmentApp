@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -124,6 +126,17 @@ public class TwitchChannel extends AppCompatActivity {
         new ParseJsonChannel().execute();
     }
 
+    //Have to create toast in UI thread
+    void createToast(String message ) {
+        final String toastText = message;
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     //Add to favourites asynchronously
     class AddFavourite extends AsyncTask<String, String, String> {
 
@@ -132,9 +145,9 @@ public class TwitchChannel extends AppCompatActivity {
             try {
                 boolean isInserted = databaseHelper.insertData(channelName, channelUrl, "0");
                 if(isInserted)
-                    Toast.makeText(TwitchChannel.this,"Favourite added!",Toast.LENGTH_SHORT).show();
+                    createToast("Favourite added!");
                 else
-                    Toast.makeText(TwitchChannel.this,"An error occurred: favourite not added",Toast.LENGTH_SHORT).show();
+                    createToast("An error occurred: favourite not added");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -150,10 +163,12 @@ public class TwitchChannel extends AppCompatActivity {
         protected String doInBackground(String... params) {
             try {
                 int result = databaseHelper.deleteData(channelName);
-                if(result > 0)
-                    Toast.makeText(TwitchChannel.this,"Favourite removed!",Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(TwitchChannel.this,"An error occurred: favourite not deleted",Toast.LENGTH_SHORT).show();
+                if(result > 0) {
+                    createToast("Favourite removed!");
+                }
+                else {
+                    createToast("An error occurred: favourite not deleted");
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();

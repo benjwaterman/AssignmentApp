@@ -7,15 +7,6 @@
     android:layout_height="match_parent"
     tools:context="uk.ac.lincoln.bwaterman.assignmentapp.TwitchChannel">
 
-    <ProgressBar
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/progressChannel"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:visibility="invisible" />
-
     <TextView
         android:layout_width="match_parent"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -159,42 +150,47 @@
                             <TextView
                                 android:text="Name:"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginLeft="10dp"
-                                android:layout_marginTop="10dp" />
+                                android:layout_marginTop="10dp"
+                                android:textStyle="normal|italic"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:text="Followers:"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginLeft="10dp"
-                                android:layout_marginTop="10dp" />
+                                android:layout_marginTop="10dp"
+                                android:textStyle="normal|italic"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:text="Mature:"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginLeft="10dp"
-                                android:layout_marginTop="10dp" />
+                                android:layout_marginTop="10dp"
+                                android:textStyle="normal|italic"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:text="Last game played:"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginLeft="10dp"
-                                android:layout_marginTop="10dp" />
+                                android:layout_marginTop="10dp"
+                                android:textStyle="normal|italic"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:text="Total views:"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginLeft="10dp"
-                                android:layout_marginTop="10dp" />
+                                android:layout_marginTop="10dp"
+                                android:textStyle="normal|italic"
+                                android:layout_height="19dp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -206,49 +202,49 @@
                             <TextView
                                 android:text="Channel_Name"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:id="@+id/channelName2"
                                 android:layout_marginTop="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginLeft="10dp"
-                                android:textStyle="normal|bold" />
+                                android:textStyle="normal|bold"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:text="0"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:id="@+id/channelFollowers2"
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginTop="10dp"
-                                android:textStyle="normal|bold" />
+                                android:textStyle="normal|bold"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:id="@+id/matureText"
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginTop="10dp"
-                                android:textStyle="normal|bold" />
+                                android:textStyle="normal|bold"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:id="@+id/gameText"
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginTop="10dp"
-                                android:textStyle="normal|bold" />
+                                android:textStyle="normal|bold"
+                                android:layout_height="19dp" />
 
                             <TextView
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:id="@+id/viewsText"
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginTop="10dp"
-                                android:textStyle="normal|bold" />
+                                android:textStyle="normal|bold"
+                                android:layout_height="19dp" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -292,5 +288,14 @@
         android:src="@android:drawable/presence_invisible"
         android:layout_above="@+id/channelName"
         android:layout_alignStart="@+id/channelName" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressChannel"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
 
 </RelativeLayout>
