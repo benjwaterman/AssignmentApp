@@ -2,8 +2,6 @@ package uk.ac.lincoln.bwaterman.assignmentapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +15,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 public class GridAdapter extends BaseAdapter {
@@ -27,6 +24,7 @@ public class GridAdapter extends BaseAdapter {
     private ArrayList<String> titleList = new ArrayList<>();
     private boolean isLarge;
     private ImageLoader imageLoader;
+    private FileHelper fileHelper;
 
     public GridAdapter(Context c, ArrayList<String> _textList, ArrayList<String> _imageUrlList, ArrayList<String> _titleList, boolean _isLarge) {
         mContext = c;
@@ -34,6 +32,7 @@ public class GridAdapter extends BaseAdapter {
         imageUrlList = _imageUrlList;
         titleList = _titleList;
         isLarge = _isLarge;
+        fileHelper = new FileHelper();
 
         if(imageLoader == null)
             imageLoader = ImageLoader.getInstance();
@@ -84,24 +83,45 @@ public class GridAdapter extends BaseAdapter {
         textView.setText(Html.fromHtml(textList.get(position)));
         String imageUrl = imageUrlList.get(position);
 
-        FileOutputStream outputStream;
-        String filename;
-        //Save image name as title of stream/game
-        filename = titleList.get(position);
+        //Name folder depending on if games or streamers
+        String folderName;
+        if(isLarge) {
+            //For streamers
+            folderName = "streamers";
+        }
+        else {
+            //For games
+            folderName = "games";
+        }
+
+        //Save subfolder name as title of stream/game
+        String subFolderName = titleList.get(position);
         //Replace blank space
-        filename = filename.replace(" ", "%");
+        subFolderName = subFolderName.replace(" ", "%");
         //Replace any "/"
-        filename = filename.replace("/", "%");
+        subFolderName = subFolderName.replace("/", "%");
+
+        //Name file
+        String fileName = "thumbnail";
         //Add file extension
-        filename += ".jpg";
-        //Create file path
-        File file = mContext.getFileStreamPath(filename);
+        fileName += ".jpg";
+
+        ///Path to parent folder
+        File parentPath = new File(mContext.getFilesDir(), folderName);
+        //Create child path for subfolder
+        File childPath = new File(parentPath, subFolderName);
+        //Create filepath of the image
+        File file = new File(childPath, fileName);
 
         //Create final so can be used in function below
-        final String finalFileName = filename;
+        final String finalFolderName = folderName;
+        //Create sub folder
+        final String finalSubFolderName = subFolderName;
+        //Name the file thumbnail
+        final String finalFileName = fileName;
 
         //If there is no file, download it, display it and save it to internal storage
-        if(file == null || !file.exists()) {
+        if(!file.exists()) {
             try {
                 //Load image, after image has been loaded hide the progress spinner
                 imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
@@ -110,9 +130,9 @@ public class GridAdapter extends BaseAdapter {
                         imageView.setImageBitmap(loadedImage);
                         progressBar.setVisibility(View.INVISIBLE);
                         //Save image
-                        saveImage(mContext, loadedImage, finalFileName);
+                        fileHelper.saveImage(mContext, loadedImage, finalFileName, finalFolderName, finalSubFolderName);
                         //Record saved image to savedImages.txt
-                        saveText(mContext, "savedImages.txt", finalFileName);
+                        fileHelper.saveText(mContext, "savedImages.txt", finalFolderName + "\\" + finalFileName);
                     }
                 });
             } catch (Exception e) {
@@ -124,7 +144,8 @@ public class GridAdapter extends BaseAdapter {
         else {
             try {
                 //Local path for imageloader to load image from
-                imageUrl = "file://" + file.getCanonicalPath();
+                //imageUrl = "file://" + file.getCanonicalPath();
+                imageUrl = "file://" + fileHelper.getFilePath(mContext, finalFileName, finalFolderName, finalSubFolderName);
 
                 //Load image, after image has been loaded hide the progress spinner
                 imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
@@ -140,52 +161,6 @@ public class GridAdapter extends BaseAdapter {
         }
 
         return grid;
-    }
-
-    //Function to save image to internal storage
-    public void saveImage(Context context, Bitmap bm, String name){
-        FileOutputStream out;
-        try {
-            out = context.openFileOutput(name, Context.MODE_PRIVATE);
-            bm.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    //Function to save text to internal storage, used to keep track of all images that have been saved
-    public void saveText(Context context, String fileName, String text) {
-        FileOutputStream out;
-        File file = context.getFileStreamPath(fileName);
-        try{
-            if(file == null || !file.exists())
-            {
-                try {
-                    out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-                    out.write(text.getBytes());
-                    out.write("\r\n".getBytes());
-                    out.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            else if(file.exists())
-            {
-                try {
-                    out = context.openFileOutput(fileName, Context.MODE_APPEND);
-                    out.write(text.getBytes());
-                    out.write("\r\n".getBytes());
-                    out.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
     }
 }
 
