@@ -57,23 +57,16 @@
         android:layout_gravity="center_horizontal"/>
 
 
-    <ListView
-        android:layout_height="200dp"
-        android:layout_width="300dp"
-        android:id="@+id/favouritesListView"
-        android:layout_above="@+id/clearImageButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp" />
-
     <TextView
         android:text="Favourites"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/favouritesTitle"
         android:textSize="20sp"
-        android:layout_above="@+id/favouritesListView"
-        android:layout_alignStart="@+id/favouritesListView"
-        android:layout_marginBottom="10dp" />
+        android:layout_above="@+id/favouritesGridView"
+        android:layout_alignStart="@+id/favouritesGridView"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp" />
 
     <LinearLayout
         android:layout_height="wrap_content"
@@ -110,5 +103,18 @@
             android:layout_width="match_parent" />
 
     </LinearLayout>
+
+    <GridView
+        android:layout_height="200dp"
+        android:layout_width="match_parent"
+        android:id="@+id/favouritesGridView"
+        android:numColumns="1"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="16dp"
+        android:layout_above="@+id/clearImageButton"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        android:layout_centerHorizontal="true" />
+
 
 </RelativeLayout>

@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +25,9 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     DatabaseHelper databaseHelper;
-    ArrayList<String> favouritesList = new ArrayList<>();
+    ArrayList<String> favouritesNamesList = new ArrayList<>();
+    ArrayList<String> favouritesViewsList = new ArrayList<>();
+    ArrayList<String> favouritesLogoList = new ArrayList<>();
     FileHelper fileHelper;
 
     @Override
@@ -38,9 +40,9 @@ public class MainActivity extends Activity {
         databaseHelper = new DatabaseHelper(this);
         fileHelper = new FileHelper(getApplicationContext());
 
-        ListView listView = (ListView) findViewById(R.id.favouritesListView);
+        GridView gridView = (GridView) findViewById(R.id.favouritesGridView);
         //Register for context menu
-        registerForContextMenu(listView);
+        registerForContextMenu(gridView);
     }
 
     protected void onStart() {
@@ -90,38 +92,51 @@ public class MainActivity extends Activity {
         spaceUsedTV.setText(spaceUsed + " MB used");
     }
 
-    void showFavourites(ArrayList<String> Message) {
-        ListView listView = (ListView) findViewById(R.id.favouritesListView);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_expandable_list_item_1, Message);
-        listView.setAdapter(arrayAdapter);
+    void showFavourites() {
+        GridView gridView = (GridView) findViewById(R.id.favouritesGridView);
+
+        //If there are no favourites to display
+        if(favouritesNamesList.size() == 0) {
+            ArrayList<String> message  = new ArrayList<>();
+            message.add("No favourites to display");
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_expandable_list_item_1, message);
+            gridView.setAdapter(arrayAdapter);
+        }
+        else {
+            gridView.setAdapter(new GridAdapter(MainActivity.this, favouritesNamesList, favouritesLogoList, favouritesNamesList, false, true));
+        }
+
     }
 
     void updateFavouritesList() {
         final Cursor res = databaseHelper.getAllData();
-        ArrayList<String> arrayList = new ArrayList<>();
-        favouritesList.clear();
+        favouritesNamesList.clear();
+        favouritesViewsList.clear();
+        favouritesLogoList.clear();
         //If no favourites have been added, do nothing
         if(res.getCount() == 0) {
             // show message
-            arrayList.add("No favourites to display");
-            showFavourites(arrayList);
-            favouritesList.clear();
+            showFavourites();
+            favouritesNamesList.clear();
+            favouritesViewsList.clear();
+            favouritesLogoList.clear();
             return;
         }
 
         while (res.moveToNext()) {
-            //Get favourites names from database and ddd them to the list
-            favouritesList.add(res.getString(1));
+            //Get favourites names from database and add them to the list
+            favouritesNamesList.add(res.getString(1));
+            //Get times viewed
+            favouritesViewsList.add(res.getString(3));
 
-            arrayList.add(res.getString(1)+"\n" +
-                    "Times Viewed: "+ res.getString(3)+"\n");
+            favouritesLogoList.add("https://pbs.twimg.com/profile_images/616076655547682816/6gMRtQyY.jpg");
         }
 
-        showFavourites(arrayList);
+        showFavourites();
 
         //Open the link to the stream on click
-        ListView listView = (ListView) findViewById(R.id.favouritesListView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        GridView gridView = (GridView) findViewById(R.id.favouritesGridView);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 res.moveToPosition(position);
                 String url = res.getString(2);
@@ -132,11 +147,13 @@ public class MainActivity extends Activity {
                     streamPage = Uri.parse(url);
                     //Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);/
                     Intent intent = new Intent(MainActivity.this, TwitchChannel.class);
-                    intent.putExtra("channelName", favouritesList.get(position));
+                    intent.putExtra("channelName", favouritesNamesList.get(position));
                     startActivity(intent);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                res.close();
             }
         });
     }
@@ -144,9 +161,9 @@ public class MainActivity extends Activity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         //If correct list view AND there is at least 1 favourite added, then create context menu
-        if (v.getId() == R.id.favouritesListView && favouritesList.size() > 0) {
+        if (v.getId() == R.id.favouritesGridView && favouritesNamesList.size() > 0) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-            menu.setHeaderTitle(favouritesList.get(info.position));
+            menu.setHeaderTitle(favouritesNamesList.get(info.position));
             MenuInflater inflater = getMenuInflater();
 
             //Always going to be in our favourites
@@ -175,11 +192,12 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                res.close();
                 return true;
 
             case R.id.remove:
                 try {
-                    int result = databaseHelper.deleteData(favouritesList.get(info.position));
+                    int result = databaseHelper.deleteData(favouritesNamesList.get(info.position));
                     if(result > 0) {
                         Toast.makeText(this, "Favourite removed!", Toast.LENGTH_SHORT).show();
                     }
@@ -191,6 +209,7 @@ public class MainActivity extends Activity {
                 }
 
                 updateFavouritesList();
+                res.close();
                 return true;
 
             default:

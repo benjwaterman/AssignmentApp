@@ -254,7 +254,7 @@ public class TwitchStreams extends Activity {
             //Find grid view stuff
             GridView gridview = (GridView) findViewById(R.id.channelGridView);
             //Set adapter to custom adapter
-            gridview.setAdapter(new GridAdapter(TwitchStreams.this, textList, channelSnapshotList, channelNameList, true));
+            gridview.setAdapter(new GridAdapter(TwitchStreams.this, textList, channelSnapshotList, channelNameList, true, false));
             //Set it to be long clickable to add to favourites
             gridview.setLongClickable(true);
             //Register for context menu

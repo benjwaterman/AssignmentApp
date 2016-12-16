@@ -107,6 +107,8 @@ public class TwitchChannel extends AppCompatActivity {
             favouritesSwitch.setChecked(false);
         }
 
+        cursor.close();
+
         //Set listener if switch is checked or unchecked
         favouritesSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

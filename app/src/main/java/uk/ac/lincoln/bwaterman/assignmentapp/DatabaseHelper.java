@@ -38,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(COL_4, times_watched);
         //Insert data, if there is a duplicate, replace it
         long result = db.insertWithOnConflict(TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
         //If no results
         if(result == -1)
             return false;
@@ -59,6 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(COL_3, url);
         contentValues.put(COL_4, times_watched);
         db.update(TABLE_NAME, contentValues, "ID = ?", new String[] { id });
+        db.close();
         return true;
     }
 
@@ -66,6 +68,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int timesWatched = Integer.parseInt(res.getString(3));
         timesWatched++;
         updateData(res.getString(0), res.getString(1), res.getString(2), Integer.toString(timesWatched));
+
+        res.close();
     }
 
 

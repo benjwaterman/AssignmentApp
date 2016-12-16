@@ -16,6 +16,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class GridAdapter extends BaseAdapter {
     private Context mContext;
@@ -23,15 +24,17 @@ public class GridAdapter extends BaseAdapter {
     private ArrayList<String> imageUrlList = new ArrayList<>();
     private ArrayList<String> titleList = new ArrayList<>();
     private boolean isLarge;
+    private boolean isLogo;
     private ImageLoader imageLoader;
     private FileHelper fileHelper;
 
-    public GridAdapter(Context c, ArrayList<String> _textList, ArrayList<String> _imageUrlList, ArrayList<String> _titleList, boolean _isLarge) {
+    public GridAdapter(Context c, ArrayList<String> _textList, ArrayList<String> _imageUrlList, ArrayList<String> _titleList, boolean _isLarge, boolean _isLogo) {
         mContext = c;
         textList = _textList;
         imageUrlList = _imageUrlList;
         titleList = _titleList;
         isLarge = _isLarge;
+        isLogo = _isLogo;
         fileHelper = new FileHelper(c);
 
         if (imageLoader == null)
@@ -63,10 +66,20 @@ public class GridAdapter extends BaseAdapter {
 
             grid = new View(mContext);
             //Use different layout for different activities
-            if (isLarge)
-                grid = inflater.inflate(R.layout.grid_single_large, null);
-            else
-                grid = inflater.inflate(R.layout.grid_single, null);
+
+            if(!isLogo) {
+                if (isLarge) {
+                    grid = inflater.inflate(R.layout.grid_single_large, null);
+                }
+                else {
+                    grid = inflater.inflate(R.layout.grid_single, null);
+                }
+            }
+            //Is logo
+            else {
+                grid = inflater.inflate(R.layout.grid_single_logo, null);
+            }
+
         } else {
             grid = (View) convertView;
         }
@@ -122,21 +135,29 @@ public class GridAdapter extends BaseAdapter {
 
         //If there is no file, download it, display it and save it to internal storage
         if (!file.exists()) {
-            try {
-                //Load image, after image has been loaded hide the progress spinner
-                imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
-                    @Override
-                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                        imageView.setImageBitmap(loadedImage);
-                        progressBar.setVisibility(View.INVISIBLE);
-                        //Save image
-                        fileHelper.saveImage(mContext, loadedImage, finalFileName, finalFolderName, finalSubFolderName);
-                        //Record saved image to savedImages.txt
-                        fileHelper.saveText(mContext, "savedImages.txt", finalFolderName + "\\" + finalFileName);
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
+            //If there is an url to download from
+            if (imageUrl != null && !Objects.equals(imageUrl, "")) {
+
+                try {
+                    //Load image, after image has been loaded hide the progress spinner
+                    imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            imageView.setImageBitmap(loadedImage);
+                            progressBar.setVisibility(View.INVISIBLE);
+                            //Save image
+                            fileHelper.saveImage(mContext, loadedImage, finalFileName, finalFolderName, finalSubFolderName);
+                            //Record saved image to savedImages.txt
+                            fileHelper.saveText(mContext, "savedImages.txt", finalFolderName + "\\" + finalFileName);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            else {
+                imageView.setImageResource(R.drawable.twitch_default_user);
             }
         }
 
