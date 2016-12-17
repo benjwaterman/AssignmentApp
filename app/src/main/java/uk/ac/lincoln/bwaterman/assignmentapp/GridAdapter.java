@@ -1,7 +1,6 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,29 +11,27 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class GridAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<String> textList = new ArrayList<>();
     private ArrayList<String> imageUrlList = new ArrayList<>();
     private ArrayList<String> titleList = new ArrayList<>();
-    private boolean isLarge;
-    private boolean isLogo;
+    private ImageType imageType;
     private ImageLoader imageLoader;
     private FileHelper fileHelper;
+    private boolean isFavourite;
 
-    public GridAdapter(Context c, ArrayList<String> _textList, ArrayList<String> _imageUrlList, ArrayList<String> _titleList, boolean _isLarge, boolean _isLogo) {
+    public GridAdapter(Context c, ArrayList<String> _textList, ArrayList<String> _imageUrlList, ArrayList<String> _titleList, ImageType _imageType, boolean _isFavourite) {
         mContext = c;
         textList = _textList;
         imageUrlList = _imageUrlList;
         titleList = _titleList;
-        isLarge = _isLarge;
-        isLogo = _isLogo;
+        imageType = _imageType;
+        isFavourite = _isFavourite;
+
         fileHelper = new FileHelper(c);
 
         if (imageLoader == null)
@@ -67,119 +64,41 @@ public class GridAdapter extends BaseAdapter {
             grid = new View(mContext);
             //Use different layout for different activities
 
-            if(!isLogo) {
-                if (isLarge) {
-                    grid = inflater.inflate(R.layout.grid_single_large, null);
-                }
-                else {
+            switch(imageType) {
+                case GAME:
                     grid = inflater.inflate(R.layout.grid_single, null);
-                }
-            }
-            //Is logo
-            else {
-                grid = inflater.inflate(R.layout.grid_single_logo, null);
-            }
+                    break;
 
+                case STREAM:
+                    grid = inflater.inflate(R.layout.grid_single_large, null);
+                    break;
+
+                case LOGO:
+                    grid = inflater.inflate(R.layout.grid_single_logo, null);
+                    break;
+
+                default:
+                    grid = inflater.inflate(R.layout.grid_single, null);
+                    break;
+            }
         } else {
             grid = (View) convertView;
         }
 
         TextView textView = (TextView) grid.findViewById(R.id.grid_text);
-        final ImageView imageView = (ImageView) grid.findViewById(R.id.grid_image);
+        ImageView imageView = (ImageView) grid.findViewById(R.id.grid_image);
 
         //Show progress spinner while image loads
-        final ProgressBar progressBar = (ProgressBar) grid.findViewById(R.id.progress);
-        progressBar.setIndeterminate(true);
-        progressBar.setVisibility(View.VISIBLE);
-        progressBar.bringToFront();
+        ProgressBar progressBar = (ProgressBar) grid.findViewById(R.id.progress);
 
         //Use fromHtml in order to get multiple styles within one textView (such as bold and non bold text)
         textView.setText(Html.fromHtml(textList.get(position)));
         String imageUrl = imageUrlList.get(position);
 
-        //Name folder depending on if games or streamers
-        String folderName;
-        if (isLarge) {
-            //For streamers
-            folderName = "streamers";
-        } else {
-            //For games
-            folderName = "games";
-        }
+        //Display the image
+        fileHelper.displayImage(mContext, imageType, imageUrl, titleList.get(position), imageView, progressBar, isFavourite);
 
-        //Save subfolder name as title of stream/game
-        String subFolderName = titleList.get(position);
-        //Replace blank space, this is to make the files work with ImageLoader as it doesn't accept certain characters in the file name
-        subFolderName = subFolderName.replace(" ", "%");
-        //Replace any "/"
-        subFolderName = subFolderName.replace("/", "%");
-
-        //Name file
-        String fileName = "thumbnail";
-        //Add file extension
-        fileName += ".jpg";
-
-        ///Path to parent folder
-        File parentPath = new File(mContext.getFilesDir(), folderName);
-        //Create child path for subfolder
-        File childPath = new File(parentPath, subFolderName);
-        //Create filepath of the image
-        File file = new File(childPath, fileName);
-
-        //Create final so can be used in function below
-        final String finalFolderName = folderName;
-        //Create sub folder
-        final String finalSubFolderName = subFolderName;
-        //Name the file thumbnail
-        final String finalFileName = fileName;
-
-        //If there is no file, download it, display it and save it to internal storage
-        if (!file.exists()) {
-            //If there is an url to download from
-            if (imageUrl != null && !Objects.equals(imageUrl, "")) {
-
-                try {
-                    //Load image, after image has been loaded hide the progress spinner
-                    imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            imageView.setImageBitmap(loadedImage);
-                            progressBar.setVisibility(View.INVISIBLE);
-                            //Save image
-                            fileHelper.saveImage(mContext, loadedImage, finalFileName, finalFolderName, finalSubFolderName);
-                            //Record saved image to savedImages.txt
-                            fileHelper.saveText(mContext, "savedImages.txt", finalFolderName + "\\" + finalFileName);
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            else {
-                imageView.setImageResource(R.drawable.twitch_default_user);
-            }
-        }
-
-        //If file exists then display the local version rather than downloading a new version
-        else {
-            try {
-                //Local path for imageloader to load image from
-                imageUrl = "file://" + fileHelper.getFilePath(mContext, finalFileName, finalFolderName, finalSubFolderName);
-
-                //Load image, after image has been loaded hide the progress spinner
-                imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
-                    @Override
-                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                        imageView.setImageBitmap(loadedImage);
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
+        //Return the grid to be displayed
         return grid;
     }
 }

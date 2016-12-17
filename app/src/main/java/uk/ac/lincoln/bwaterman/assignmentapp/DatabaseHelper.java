@@ -13,6 +13,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_2 = "NAME";
     public static final String COL_3 = "URL";
     public static final String COL_4 = "TIMES_WATCHED";
+    public static final String COL_5 = "LOGO_URL";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -20,7 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + TABLE_NAME +" (ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME TEXT,URL TEXT,TIMES_WATCHED INTEGER)");
+        db.execSQL("create table " + TABLE_NAME +" (ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME TEXT,URL TEXT,TIMES_WATCHED INTEGER, LOGO_URL TEXT)");
     }
 
     @Override
@@ -30,15 +31,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //Insert data into database
-    public boolean insertData(String name, String url, String times_watched) {
+    public boolean insertData(String name, String url, String times_watched, String logo_url) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_2, name);
         contentValues.put(COL_3, url);
         contentValues.put(COL_4, times_watched);
+        contentValues.put(COL_5, logo_url);
         //Insert data, if there is a duplicate, replace it
         long result = db.insertWithOnConflict(TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
-        db.close();
         //If no results
         if(result == -1)
             return false;
@@ -52,22 +53,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return res;
     }
 
-    public boolean updateData(String id, String name, String url, String times_watched) {
+    public boolean updateData(String id, String name, String url, String times_watched, String logo_url) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, name);
         contentValues.put(COL_3, url);
         contentValues.put(COL_4, times_watched);
+        contentValues.put(COL_5, logo_url);
         db.update(TABLE_NAME, contentValues, "ID = ?", new String[] { id });
-        db.close();
         return true;
     }
 
     public void updateTimesViewed(Cursor res) {
         int timesWatched = Integer.parseInt(res.getString(3));
         timesWatched++;
-        updateData(res.getString(0), res.getString(1), res.getString(2), Integer.toString(timesWatched));
+        updateData(res.getString(0), res.getString(1), res.getString(2), Integer.toString(timesWatched), res.getString(4));
 
         res.close();
     }

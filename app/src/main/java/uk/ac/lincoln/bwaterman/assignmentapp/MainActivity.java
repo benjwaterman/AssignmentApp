@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
             gridView.setAdapter(arrayAdapter);
         }
         else {
-            gridView.setAdapter(new GridAdapter(MainActivity.this, favouritesNamesList, favouritesLogoList, favouritesNamesList, false, true));
+            gridView.setAdapter(new GridAdapter(MainActivity.this, favouritesNamesList, favouritesLogoList, favouritesNamesList, ImageType.LOGO, true));
         }
 
     }
@@ -128,8 +128,8 @@ public class MainActivity extends Activity {
             favouritesNamesList.add(res.getString(1));
             //Get times viewed
             favouritesViewsList.add(res.getString(3));
-
-            favouritesLogoList.add("https://pbs.twimg.com/profile_images/616076655547682816/6gMRtQyY.jpg");
+            //Get logo url
+            favouritesLogoList.add(res.getString(4));
         }
 
         showFavourites();

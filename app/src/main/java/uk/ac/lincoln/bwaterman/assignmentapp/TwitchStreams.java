@@ -28,6 +28,7 @@ public class TwitchStreams extends Activity {
     ArrayList<String> channelSnapshotList = new ArrayList<>();
     ArrayList<String> channelFollowerList = new ArrayList<>();
     ArrayList<String> channelUrlList = new ArrayList<>();
+    ArrayList<String> channelLogoUrlList = new ArrayList<>();
     ArrayList<String> textList = new ArrayList<>();
     String gameName;
     String gameViewers;
@@ -125,7 +126,7 @@ public class TwitchStreams extends Activity {
             //Add to favourites
             case R.id.add:
                 try {
-                    boolean isInserted = databaseHelper.insertData(channelNameList.get(info.position), channelUrlList.get(info.position), "0");
+                    boolean isInserted = databaseHelper.insertData(channelNameList.get(info.position), channelUrlList.get(info.position), "0", channelLogoUrlList.get(info.position));
                     if(isInserted)
                         Toast.makeText(TwitchStreams.this,"Favourite added!",Toast.LENGTH_SHORT).show();
                     else
@@ -201,6 +202,7 @@ public class TwitchStreams extends Activity {
                         String followersToAdd;
                         String snapshotUrlToAdd;
                         String urlToAdd;
+                        String logoToAdd;
                         try {
                             nameToAdd = subObject.getJSONObject("channel").getString("display_name");// + " currently has " + subObject.getString("viewers") + " viewers.";
                             channelNameList.add(nameToAdd);
@@ -222,15 +224,22 @@ public class TwitchStreams extends Activity {
                         }
                         try {
                             snapshotUrlToAdd = subObject.getJSONObject("preview").getString("medium");
-                            //add the name of the game to the url
+                            //a thumbnail of the stream
                             channelSnapshotList.add(snapshotUrlToAdd);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         try {
                             urlToAdd = subObject.getJSONObject("channel").getString("url");
-                            //add the name of the game to the url
+                            //aad url of stream
                             channelUrlList.add(urlToAdd);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            logoToAdd = subObject.getJSONObject("channel").getString("logo");
+                            //add the logo to a list, only used if added to favourites
+                            channelLogoUrlList.add(logoToAdd);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -254,7 +263,7 @@ public class TwitchStreams extends Activity {
             //Find grid view stuff
             GridView gridview = (GridView) findViewById(R.id.channelGridView);
             //Set adapter to custom adapter
-            gridview.setAdapter(new GridAdapter(TwitchStreams.this, textList, channelSnapshotList, channelNameList, true, false));
+            gridview.setAdapter(new GridAdapter(TwitchStreams.this, textList, channelSnapshotList, channelNameList, ImageType.STREAM, false));
             //Set it to be long clickable to add to favourites
             gridview.setLongClickable(true);
             //Register for context menu
@@ -266,6 +275,7 @@ public class TwitchStreams extends Activity {
                     String url = channelUrlList.get(position);
                     //Add to times viewed
                     Cursor cursor = databaseHelper.getNameMatches(channelNameList.get(position));
+                    //If already in database
                     if(cursor.getCount() > 0) {
                         cursor.moveToPosition(0);
                         databaseHelper.updateTimesViewed(cursor);

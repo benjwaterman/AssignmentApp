@@ -31,6 +31,8 @@ import static android.R.drawable.presence_online;
 
 public class TwitchChannel extends AppCompatActivity {
 
+    ImageLoader imageLoader;
+
     String channelName;
     String channelFollowers;
     boolean isConnected;
@@ -48,6 +50,7 @@ public class TwitchChannel extends AppCompatActivity {
 
     //Database
     DatabaseHelper databaseHelper;
+    boolean isFavourite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,9 @@ public class TwitchChannel extends AppCompatActivity {
         }
 
         databaseHelper = new DatabaseHelper(this);
+        //Setup imageloader
+        if(imageLoader == null)
+            imageLoader = ImageLoader.getInstance();
 
         //Check if streamer is in favourites
         Cursor cursor = databaseHelper.getNameMatches(channelName);
@@ -100,11 +106,13 @@ public class TwitchChannel extends AppCompatActivity {
         if(cursor.getCount() > 0)
         {
             favouritesSwitch.setChecked(true);
+            isFavourite = true;
         }
         //Not in favourites
         else
         {
             favouritesSwitch.setChecked(false);
+            isFavourite = false;
         }
 
         cursor.close();
@@ -128,6 +136,27 @@ public class TwitchChannel extends AppCompatActivity {
         new ParseJsonChannel().execute();
     }
 
+    void displayFavouriteImages() {
+        FileHelper fileHelper = new FileHelper(getApplicationContext());
+        //Assign logo
+        {
+            ImageView imageView = (ImageView) findViewById(R.id.channelLogo);
+            //imageLoader.displayImage(logoUrl, imageView);
+            fileHelper.displayImage(getApplicationContext(), ImageType.LOGO, logoUrl, channelName, imageView, null, isFavourite);
+        }
+
+        //Assign banner
+        {
+            ImageView imageView = (ImageView) findViewById(R.id.channelBanner);
+            //imageLoader.displayImage(bannerUrl, imageView);
+            fileHelper.displayImage(getApplicationContext(), ImageType.BANNER, bannerUrl, channelName, imageView, null, isFavourite);
+        }
+
+        //Complete progress spinner after done loading
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressChannel);
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
     //Have to create toast in UI thread
     void createToast(String message ) {
         final String toastText = message;
@@ -145,7 +174,7 @@ public class TwitchChannel extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             try {
-                boolean isInserted = databaseHelper.insertData(channelName, channelUrl, "0");
+                boolean isInserted = databaseHelper.insertData(channelName, channelUrl, "0", logoUrl);
                 if(isInserted)
                     createToast("Favourite added!");
                 else
@@ -188,9 +217,6 @@ public class TwitchChannel extends AppCompatActivity {
         String getVideosUrl = "https://api.twitch.tv/kraken/channels/" + channelName + "/videos?limit=10" + "&broadcasts=true";
         ProgressBar progressBar;
 
-        //Setup imageloader
-        ImageLoader imageLoader = ImageLoader.getInstance();
-
         @Override
         protected void onPreExecute() {
             //Get progress bar
@@ -213,8 +239,10 @@ public class TwitchChannel extends AppCompatActivity {
                 //If no data was returned or string is null, set connection to false and return out of function
                 if(json == null || json.length() == 0) {
                     isConnected = false;
+                    displayFavouriteImages();
                     return null;
                 }
+
                 isConnected = true;
 
                 // parse returned json into json object
@@ -270,10 +298,10 @@ public class TwitchChannel extends AppCompatActivity {
                     }
                 }
 
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             return null;
         }
 
@@ -314,7 +342,9 @@ public class TwitchChannel extends AppCompatActivity {
             //Assign banner
             if(bannerUrl != null && !Objects.equals(bannerUrl, "") && !Objects.equals(bannerUrl, "null")) {
                 ImageView imageView = (ImageView) findViewById(R.id.channelBanner);
-                imageLoader.displayImage(bannerUrl, imageView);
+                //imageLoader.displayImage(bannerUrl, imageView);
+                FileHelper fileHelper = new FileHelper(getApplicationContext());
+                fileHelper.displayImage(getApplicationContext(), ImageType.BANNER, bannerUrl, channelName, imageView, null, isFavourite);
             }
 
             //Set if channel is mature

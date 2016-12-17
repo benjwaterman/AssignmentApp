@@ -4,10 +4,17 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Objects;
 
 /**
  * Created by Ben on 15/12/2016.
@@ -16,8 +23,10 @@ import java.io.FileOutputStream;
 public class FileHelper {
 
     private Context thisContext;
+    private ImageLoader imageLoader;
 
     public FileHelper(Context context) {
+
         thisContext = context;
     }
 
@@ -30,6 +39,142 @@ public class FileHelper {
 
         saveImageToDisk(bm, path, fileName);
 
+    }
+
+    //Displays an image either by downloading the image and storing it or using a local copy if its available
+    public void displayImage(Context context, ImageType imageType, String imageUrl, String name, ImageView _imageView, ProgressBar _progressBar, boolean isFavourite) {
+        if (imageLoader == null)
+            imageLoader = ImageLoader.getInstance();
+
+        //Show progress spinner while image loads
+        final ProgressBar progressBar = _progressBar;
+        final ImageView imageView = _imageView;
+
+        if(progressBar != null) {
+            progressBar.setIndeterminate(true);
+            progressBar.setVisibility(View.VISIBLE);
+            progressBar.bringToFront();
+        }
+
+        //Name folder depending on if games or streamers or favourites
+        String folderName;
+        //Name file
+        String fileName;
+        switch(imageType) {
+            case GAME:
+                folderName = "games";
+                fileName = "thumbnail";
+                break;
+
+            case STREAM:
+                folderName = "streamers";
+                fileName = "thumbnail";
+                break;
+
+            //If in favourites save to a different location than normal streamers, so the image doesn't get deleted if the user clears image data
+            case LOGO:
+                if(isFavourite) {
+                    folderName = "favourites";
+                }
+                else {
+                    folderName = "streamers";
+                }
+                fileName = "logo";
+                break;
+
+            case BANNER:
+                if(isFavourite) {
+                    folderName = "favourites";
+                }
+                else {
+                    folderName = "streamers";
+                }
+                fileName = "banner";
+                break;
+
+            default:
+                folderName = "games";
+                fileName = "thumbnail";
+                break;
+        }
+
+        //Save subfolder name as title of stream/game
+        String subFolderName = name;
+        //Replace blank space, this is to make the files work with ImageLoader as it doesn't accept certain characters in the file name
+        subFolderName = subFolderName.replace(" ", "%");
+        //Replace any "/"
+        subFolderName = subFolderName.replace("/", "%");
+
+        //Add file extension
+        fileName += ".jpg";
+
+        ///Path to parent folder
+        File parentPath = new File(context.getFilesDir(), folderName);
+        //Create child path for subfolder
+        File childPath = new File(parentPath, subFolderName);
+        //Create filepath of the image
+        File file = new File(childPath, fileName);
+
+        //Create final so can be used in function below
+        final String finalFolderName = folderName;
+        //Create sub folder
+        final String finalSubFolderName = subFolderName;
+        //Name the file thumbnail
+        final String finalFileName = fileName;
+
+        //If there is no file, download it, display it and save it to internal storage
+        if (!file.exists()) {
+            //If there is an url to download from
+            if (imageUrl != null && !Objects.equals(imageUrl, "") && !Objects.equals(imageUrl, "null")) {
+
+                try {
+                    //Load image, after image has been loaded hide the progress spinner
+                    imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            imageView.setImageBitmap(loadedImage);
+                            if(progressBar != null) {
+                                progressBar.setVisibility(View.INVISIBLE);
+                            }
+                            //Save image
+                            saveImage(thisContext, loadedImage, finalFileName, finalFolderName, finalSubFolderName);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            else {
+                imageView.setImageResource(R.drawable.twitch_default_user);
+            }
+        }
+
+        //If file exists then display the local version rather than downloading a new version
+        else {
+            try {
+                //Local path for imageloader to load image from
+                String filePath = getFilePath(context, finalFileName, finalFolderName, finalSubFolderName);
+                //If file exists
+                if(filePath != null) {
+                    imageUrl = "file://" + filePath;
+
+                    //Load image, after image has been loaded hide the progress spinner
+                    imageLoader.loadImage(imageUrl, new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            imageView.setImageBitmap(loadedImage);
+                            if (progressBar != null) {
+                                progressBar.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     //Save image with a nested folder
@@ -98,40 +243,6 @@ public class FileHelper {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    //Function to save text to internal storage, used to keep track of all images that have been saved
-    public void saveText(Context context, String fileName, String text) {
-        FileOutputStream out;
-        File file = context.getFileStreamPath(fileName);
-        try{
-            if(file == null || !file.exists())
-            {
-                try {
-                    out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-                    out.write(text.getBytes());
-                    out.write("\r\n".getBytes());
-                    out.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            else if(file.exists())
-            {
-                try {
-                    out = context.openFileOutput(fileName, Context.MODE_APPEND);
-                    out.write(text.getBytes());
-                    out.write("\r\n".getBytes());
-                    out.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
         }
     }
 

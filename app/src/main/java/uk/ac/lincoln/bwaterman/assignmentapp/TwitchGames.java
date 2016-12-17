@@ -125,7 +125,7 @@ public class TwitchGames extends Activity {
 
             //Gridview stuff
             GridView gridview = (GridView) findViewById(R.id.twitchList);
-            gridview.setAdapter(new GridAdapter(TwitchGames.this, textList, imageUrlList, gameList, false, false));
+            gridview.setAdapter(new GridAdapter(TwitchGames.this, textList, imageUrlList, gameList, ImageType.GAME, false));
 
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View v,
