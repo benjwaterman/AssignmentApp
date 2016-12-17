@@ -108,7 +108,6 @@
 
     <Button
         android:id="@+id/clearImageButton"
-        android:onClick="clearImageData"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:background="@android:drawable/ic_menu_info_details"
         android:textColor="@android:color/white"

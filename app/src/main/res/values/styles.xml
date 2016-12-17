@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@android:color/holo_purple</item>
-        <item name="android:textColorPrimary">@color/common_google_signin_btn_text_dark</item>
+        <item name="android:textColorPrimary">?android:attr/textColorTertiary</item>
     </style>
 
 </resources>

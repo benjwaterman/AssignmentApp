@@ -57,7 +57,7 @@ public class TwitchChannel extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_twitch_channel);
 
-        TabHost tabHost = (TabHost)findViewById(R.id.channelTabs);
+        final TabHost tabHost = (TabHost)findViewById(R.id.channelTabs);
         tabHost.setup();
 
         TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
@@ -69,6 +69,39 @@ public class TwitchChannel extends AppCompatActivity {
         tabSpec.setContent(R.id.videosTab);
         tabSpec.setIndicator("VIDEOS");
         tabHost.addTab(tabSpec);
+
+        //Set text colour of tabs to white
+        for(int i=0;i<tabHost.getTabWidget().getChildCount();i++)
+        {
+            TextView tv = (TextView) tabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
+            tv.setTextColor(getResources().getColor(R.color.common_google_signin_btn_text_dark));
+        }
+
+        //Set colour of currently selected tab
+        tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab()).setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        TextView tv = (TextView) tabHost.getCurrentTabView().findViewById(android.R.id.title);
+        tv.setTextColor(getResources().getColor(R.color.common_google_signin_btn_text_dark));
+
+        //Add listener to change colour of tab when a different tab is selected
+        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+
+            @Override
+            public void onTabChanged(String tabId) {
+
+                //Unselected tab
+                for (int i = 0; i < tabHost.getTabWidget().getChildCount(); i++) {
+                    tabHost.getTabWidget().getChildAt(i).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    TextView tv = (TextView) tabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
+                    tv.setTextColor(getResources().getColor(R.color.common_google_signin_btn_text_dark));
+                }
+
+                //Selected tab
+                tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab()).setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                TextView tv = (TextView) tabHost.getCurrentTabView().findViewById(android.R.id.title);
+                tv.setTextColor(getResources().getColor(R.color.common_google_signin_btn_text_dark));
+
+            }
+        });
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -155,6 +188,10 @@ public class TwitchChannel extends AppCompatActivity {
         //Complete progress spinner after done loading
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressChannel);
         progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    void watchStream(View view) {
+
     }
 
     //Have to create toast in UI thread

@@ -11,7 +11,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.GridView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +23,9 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
+
+import static uk.ac.lincoln.bwaterman.assignmentapp.R.id.delete;
+import static uk.ac.lincoln.bwaterman.assignmentapp.R.id.view;
 
 public class MainActivity extends Activity {
 
@@ -43,6 +48,28 @@ public class MainActivity extends Activity {
         GridView gridView = (GridView) findViewById(R.id.favouritesGridView);
         //Register for context menu
         registerForContextMenu(gridView);
+
+        //Add listener for button click
+        final Button optionsButton = (Button) findViewById(R.id.clearImageButton);
+        optionsButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(MainActivity.this, optionsButton);
+                popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case delete:
+                                clearImageData();
+                        }
+                        return true;
+                    }
+                });
+                popupMenu.show();
+            }
+        });
     }
 
     protected void onStart() {
@@ -62,7 +89,13 @@ public class MainActivity extends Activity {
     }
 
     //Clear images function
-    public void clearImageData(View view) {
+    public void clearImageData() {
+
+        //Check there is data to delete
+        if(fileHelper.getImageDataSize(new File(getFilesDir(), "streamers")) + fileHelper.getImageDataSize(new File(getFilesDir(), "games")) == 0) {
+            Toast.makeText(getApplicationContext(), "No image data to delete!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         //Delete files
         try {
@@ -71,7 +104,7 @@ public class MainActivity extends Activity {
             success2 = fileHelper.deleteFile(new File(getFilesDir(), "games"));
 
             if(success1 && success2) {
-                Toast.makeText(getApplicationContext(), "Image data deleted!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Image data deleted", Toast.LENGTH_SHORT).show();
             }
         }
         catch (Exception e) {
@@ -177,7 +210,7 @@ public class MainActivity extends Activity {
         Cursor res = databaseHelper.getAllData();
         switch (item.getItemId()) {
             //Open stream
-            case R.id.view:
+            case view:
                 //Move cursor to position to this streamer
                 res.moveToPosition(info.position);
                 //Get url from 3rd column in database
