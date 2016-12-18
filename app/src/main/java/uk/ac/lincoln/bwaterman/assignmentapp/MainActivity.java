@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import static uk.ac.lincoln.bwaterman.assignmentapp.R.id.delete;
 import static uk.ac.lincoln.bwaterman.assignmentapp.R.id.view;
+import static uk.ac.lincoln.bwaterman.assignmentapp.R.id.watch;
 
 public class MainActivity extends Activity {
 
@@ -207,8 +208,15 @@ public class MainActivity extends Activity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         Cursor res = databaseHelper.getAllData();
         switch (item.getItemId()) {
-            //Open stream
+            //Open channel info
             case view:
+                Intent intent = new Intent(MainActivity.this, TwitchChannel.class);
+                intent.putExtra("channelName", favouritesNamesList.get(info.position));
+                startActivity(intent);
+                return true;
+
+            //Open stream
+            case watch:
                 //Move cursor to position to this streamer
                 res.moveToPosition(info.position);
                 //Get url from 3rd column in database
@@ -218,7 +226,7 @@ public class MainActivity extends Activity {
                 Uri streamPage;
                 try {
                     streamPage = Uri.parse(url);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+                    intent = new Intent(Intent.ACTION_VIEW, streamPage);
                     startActivity(intent);
                 } catch (Exception e) {
                     e.printStackTrace();

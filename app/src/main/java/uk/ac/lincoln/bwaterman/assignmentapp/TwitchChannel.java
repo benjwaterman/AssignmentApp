@@ -1,5 +1,6 @@
 package uk.ac.lincoln.bwaterman.assignmentapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -48,6 +50,7 @@ public class TwitchChannel extends AppCompatActivity {
     String views;
     ArrayList<String> videoUrlList = new ArrayList<>();
     ArrayList<String> videoThumbList = new ArrayList<>();
+    ArrayList<String> videoLengthList = new ArrayList<>();
 
     //Database
     DatabaseHelper databaseHelper;
@@ -192,7 +195,14 @@ public class TwitchChannel extends AppCompatActivity {
     }
 
     void watchStream(View view) {
-
+        Uri streamPage;
+        try {
+            streamPage = Uri.parse(channelUrl);
+            Intent intent = new Intent(Intent.ACTION_VIEW, streamPage);
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //Have to create toast in UI thread
@@ -323,6 +333,7 @@ public class TwitchChannel extends AppCompatActivity {
                                 //Get video url and add it to list
                                 videoUrlList.add(json_message.getString("url"));
                                 videoThumbList.add(json_message.getString("preview"));
+                                videoLengthList.add(json_message.getString("length"));
                             }
                         }
                     }
@@ -418,8 +429,25 @@ public class TwitchChannel extends AppCompatActivity {
                 {
                     //Check theres something to display
                     if(videoThumbList.get(i) != null && !Objects.equals(videoThumbList.get(i), "")) {
+                        View videoView;
+                        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                        videoView = inflater.inflate(R.layout.video_thumbnail, null);
+                        textView = (TextView) videoView.findViewById(R.id.grid_text);
+                        ImageView imageView = (ImageView) videoView.findViewById(R.id.grid_image);
+
+                        int hours = Integer.parseInt(videoLengthList.get(i)) / 3600;
+                        int minutes = (Integer.parseInt(videoLengthList.get(i)) % 3600) / 60;//Integer.parseInt(videoLengthList.get(i)) % 60;
+                        int seconds = Integer.parseInt(videoLengthList.get(i)) % 60;
+
+                        //Display length of videos in HH:MM::SS format
+                        textView.setText(String.format("%d:%02d:%02d", hours, minutes, seconds));
+                        imageLoader.displayImage(videoThumbList.get(i), imageView);
+
+                        layout.addView(videoView);
+/*
                         ImageView imageView = new ImageView(TwitchChannel.this);
-                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int)TwitchChannel.this.getResources().getDisplayMetrics().density * 160, (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 90);//new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
                         //Convert pixel to dp
                         int marginSize = (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 5;
                         //Set margin
@@ -444,7 +472,9 @@ public class TwitchChannel extends AppCompatActivity {
                         imageLoader.displayImage(videoThumbList.get(i), imageView);
 
                         // Adds imageview to layout
-                        layout.addView(imageView);
+                        layout.addView(imageView); */
+
+
                     }
                 }
             }

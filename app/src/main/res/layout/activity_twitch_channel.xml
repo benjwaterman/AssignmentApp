@@ -103,7 +103,8 @@
         android:background="@color/colorPrimary"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:layout_above="@+id/channelTabs"
-        android:layout_alignStart="@+id/channelName" />
+        android:layout_alignStart="@+id/channelName"
+        android:onClick="watchStream" />
 
     <TabHost
         android:layout_width="match_parent"
@@ -264,7 +265,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:orientation="horizontal"
-                            android:id="@+id/videoThumbLayout" />
+                            android:id="@+id/videoThumbLayout"
+                            android:gravity="center" />
                     </HorizontalScrollView>
                 </LinearLayout>
 
