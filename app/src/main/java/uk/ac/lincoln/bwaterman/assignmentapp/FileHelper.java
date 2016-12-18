@@ -292,6 +292,15 @@ public class FileHelper {
         return success;
     }
 
+    //Deletes all possible images stored for a favourite
+    void deleteFavouriteImages(String name) {
+        //Delete folder, function handles deleting all files within the folder
+        File file = new File(new File(thisContext.getFilesDir(), "favourites"), name);
+        if(file.exists()) {
+            deleteFile(file);
+        }
+    }
+
     //Have to create toast in UI thread
     void createToast(String message ) {
         final String toastText = message;

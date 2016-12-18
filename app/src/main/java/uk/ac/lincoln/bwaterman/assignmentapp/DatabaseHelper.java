@@ -69,8 +69,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int timesWatched = Integer.parseInt(res.getString(3));
         timesWatched++;
         updateData(res.getString(0), res.getString(1), res.getString(2), Integer.toString(timesWatched), res.getString(4));
-
-        res.close();
     }
 
 

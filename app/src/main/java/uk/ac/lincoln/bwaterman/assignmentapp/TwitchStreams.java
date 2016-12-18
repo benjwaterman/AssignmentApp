@@ -33,6 +33,7 @@ public class TwitchStreams extends Activity {
     String gameName;
     String gameViewers;
     DatabaseHelper databaseHelper;
+    FileHelper fileHelper;
     boolean isConnected;
 
     @Override
@@ -40,6 +41,7 @@ public class TwitchStreams extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_twitch_streams);
         databaseHelper = new DatabaseHelper(this);
+        fileHelper = new FileHelper(getApplicationContext());
 
         //Start progress spinner while loading
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressStreams);
@@ -140,10 +142,13 @@ public class TwitchStreams extends Activity {
             case R.id.remove:
                 try {
                     int result = databaseHelper.deleteData(channelNameList.get(info.position));
-                    if(result > 0)
-                        Toast.makeText(TwitchStreams.this,"Favourite removed!",Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(TwitchStreams.this,"An error occurred: favourite not deleted",Toast.LENGTH_SHORT).show();
+                    if(result > 0) {
+                        Toast.makeText(TwitchStreams.this, "Favourite removed!", Toast.LENGTH_SHORT).show();
+                        fileHelper.deleteFavouriteImages(channelNameList.get(info.position));
+                    }
+                    else {
+                        Toast.makeText(TwitchStreams.this, "An error occurred: favourite not deleted", Toast.LENGTH_SHORT).show();
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -204,7 +209,7 @@ public class TwitchStreams extends Activity {
                         String urlToAdd;
                         String logoToAdd;
                         try {
-                            nameToAdd = subObject.getJSONObject("channel").getString("display_name");// + " currently has " + subObject.getString("viewers") + " viewers.";
+                            nameToAdd = subObject.getJSONObject("channel").getString("name");// + " currently has " + subObject.getString("viewers") + " viewers.";
                             channelNameList.add(nameToAdd);
                         } catch (Exception e) {
                             e.printStackTrace();

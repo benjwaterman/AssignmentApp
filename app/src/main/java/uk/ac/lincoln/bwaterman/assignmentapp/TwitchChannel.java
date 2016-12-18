@@ -32,6 +32,7 @@ import static android.R.drawable.presence_online;
 public class TwitchChannel extends AppCompatActivity {
 
     ImageLoader imageLoader;
+    FileHelper fileHelper;
 
     String channelName;
     String channelFollowers;
@@ -130,6 +131,7 @@ public class TwitchChannel extends AppCompatActivity {
         //Setup imageloader
         if(imageLoader == null)
             imageLoader = ImageLoader.getInstance();
+        fileHelper = new FileHelper(getApplicationContext());
 
         //Check if streamer is in favourites
         Cursor cursor = databaseHelper.getNameMatches(channelName);
@@ -170,7 +172,6 @@ public class TwitchChannel extends AppCompatActivity {
     }
 
     void displayFavouriteImages() {
-        FileHelper fileHelper = new FileHelper(getApplicationContext());
         //Assign logo
         {
             ImageView imageView = (ImageView) findViewById(R.id.channelLogo);
@@ -233,6 +234,7 @@ public class TwitchChannel extends AppCompatActivity {
                 int result = databaseHelper.deleteData(channelName);
                 if(result > 0) {
                     createToast("Favourite removed!");
+                    fileHelper.deleteFavouriteImages(channelName);
                 }
                 else {
                     createToast("An error occurred: favourite not deleted");
@@ -259,6 +261,11 @@ public class TwitchChannel extends AppCompatActivity {
             //Get progress bar
             progressBar = (ProgressBar) findViewById(R.id.progressChannel);
             progressBar.setVisibility(View.VISIBLE);
+
+            //Show images for favourites if they exist, this stops the delay of waiting until the json has been parsed
+            if(isFavourite) {
+                displayFavouriteImages();
+            }
         }
 
         @Override
@@ -276,7 +283,7 @@ public class TwitchChannel extends AppCompatActivity {
                 //If no data was returned or string is null, set connection to false and return out of function
                 if(json == null || json.length() == 0) {
                     isConnected = false;
-                    displayFavouriteImages();
+
                     return null;
                 }
 
@@ -373,14 +380,12 @@ public class TwitchChannel extends AppCompatActivity {
             //Assign logo
             if(logoUrl != null && !Objects.equals(logoUrl, "")) {
                 ImageView imageView = (ImageView) findViewById(R.id.channelLogo);
-                imageLoader.displayImage(logoUrl, imageView);
+                fileHelper.displayImage(getApplicationContext(), ImageType.LOGO, logoUrl, channelName, imageView, null, isFavourite);
             }
 
             //Assign banner
             if(bannerUrl != null && !Objects.equals(bannerUrl, "") && !Objects.equals(bannerUrl, "null")) {
                 ImageView imageView = (ImageView) findViewById(R.id.channelBanner);
-                //imageLoader.displayImage(bannerUrl, imageView);
-                FileHelper fileHelper = new FileHelper(getApplicationContext());
                 fileHelper.displayImage(getApplicationContext(), ImageType.BANNER, bannerUrl, channelName, imageView, null, isFavourite);
             }
 

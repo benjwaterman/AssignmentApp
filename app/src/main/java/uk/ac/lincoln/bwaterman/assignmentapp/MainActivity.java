@@ -185,8 +185,6 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                res.close();
             }
         });
     }
@@ -233,6 +231,7 @@ public class MainActivity extends Activity {
                     int result = databaseHelper.deleteData(favouritesNamesList.get(info.position));
                     if(result > 0) {
                         Toast.makeText(this, "Favourite removed!", Toast.LENGTH_SHORT).show();
+                        fileHelper.deleteFavouriteImages(favouritesNamesList.get(info.position));
                     }
                     else
                         Toast.makeText(this,"An error occurred: favourite not deleted",Toast.LENGTH_SHORT).show();
