@@ -444,18 +444,6 @@ public class TwitchChannel extends AppCompatActivity {
                         textView.setText(String.format("%d:%02d:%02d", hours, minutes, seconds));
                         imageLoader.displayImage(videoThumbList.get(i), imageView);
 
-                        layout.addView(videoView);
-/*
-                        ImageView imageView = new ImageView(TwitchChannel.this);
-                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int)TwitchChannel.this.getResources().getDisplayMetrics().density * 160, (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 90);//new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                        //Convert pixel to dp
-                        int marginSize = (int)TwitchChannel.this.getResources().getDisplayMetrics().density * 5;
-                        //Set margin
-                        layoutParams.setMargins(marginSize, marginSize, marginSize, marginSize);
-
-                        imageView.setLayoutParams(layoutParams);
-                        imageView.setLayoutParams(layoutParams);
-
                         //On an on click listener to each picture so if its clicked it goes to that video
                         final String url = videoUrlList.get(i);
                         imageView.setOnClickListener(new ImageView.OnClickListener() {
@@ -466,15 +454,8 @@ public class TwitchChannel extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         });
-                        //imageView.setMaxHeight(100);
-                        //imageView.setMaxWidth(100);
 
-                        imageLoader.displayImage(videoThumbList.get(i), imageView);
-
-                        // Adds imageview to layout
-                        layout.addView(imageView); */
-
-
+                        layout.addView(videoView);
                     }
                 }
             }

@@ -146,7 +146,10 @@ public class FileHelper {
             }
 
             else {
-                imageView.setImageResource(R.drawable.twitch_default_user);
+                //If user doesn't have a logo, set it to the default
+                if(imageType == ImageType.LOGO) {
+                    imageView.setImageResource(R.drawable.twitch_default_user);
+                }
             }
         }
 
